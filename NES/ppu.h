@@ -7,7 +7,7 @@
 
 class Ppu {
   public:
-    uint8_t imgdata[256 * 240 * 3]{};
+    uint32_t imgdata[256 * 240]{};
 
   private:
     Rom *rom = nullptr;
@@ -50,6 +50,7 @@ class Ppu {
     void run(size_t cpuclock);
     void clear_img();
     bool get_img_status();
+    uint32_t* get_img_data();
     void set_chr_rom_page(size_t num);
 
 
@@ -66,16 +67,17 @@ class Ppu {
     void render_frame();
     void build_bg();
     void build_bg_line();
+    void build_sp_line();
 
     uint8_t is_bigsize();
     bool is_sprite_enable();
     bool is_screen_enable();
     void in_vblank();
     void post_render();
-    void set_img_data(std::vector<uint8_t>);
+    void set_img_data(std::vector<uint8_t> rgb);
 
 
-    // port
+  // port
   public:
     void    write_scroll_reg(uint8_t value);
     void    write_ppu_ctrl0_reg(uint8_t value);

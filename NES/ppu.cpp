@@ -155,7 +155,7 @@ void Ppu::render_frame()
 
         if (8 <= line && line < 232) {
             build_bg();
-            // build_sp_line();
+            build_sp_line();
             for (size_t p = 0; p < 256; p++){
                 auto idx = palette[bg_line_buffer[p]];
                 auto pal = PALLETE_TABLE[idx];
@@ -165,7 +165,7 @@ void Ppu::render_frame()
             for (size_t p = 0; p < 264; p++){
                 bg_line_buffer[p] = 0x10;
             }
-            // build_sp_line();
+            build_sp_line();
         }
 
         if ((ppu_addr & 0x7000) == 0x7000) {
@@ -190,17 +190,27 @@ void Ppu::render_frame()
 }
 void Ppu::build_bg()
 {
-
-
+    if ((regs[0x01] & 0x08) != 0x08) {
+        for (size_t p = 0; p < 264; p++){
+            bg_line_buffer[p] = 0x10;
+        }
+        return;
+    }
+    build_bg_line();
+    if ((regs[0x01] & 0x02) != 0x02) {
+        for (size_t x = 0; x < 8; x++){
+            bg_line_buffer[x] = 0x10;
+        }
+    }
 }
 void Ppu::build_bg_line()
 {
 
-
+    
 }
-
-
-
+void Ppu::build_sp_line()
+{
+}
 void Ppu::in_vblank()
 {
     scroll_reg_flg = false;
@@ -219,9 +229,11 @@ void Ppu::post_render()
     regs[0x02] &= 0x7f;
     imgok = true;
 }
-void Ppu::set_img_data(std::vector<uint8_t>)
+void Ppu::set_img_data(std::vector<uint8_t> rgb)
 {
-
+    uint32_t dots = (0xFF000000 | (200 << 16) | (0 << 8) | 0);
+    imgdata[imgidx] = dots;
+    imgidx++;
 }
 void Ppu::clear_img()
 {
@@ -236,6 +248,14 @@ bool Ppu::get_img_status()
         return false;
     }
 }
+uint32_t* Ppu::get_img_data()
+{
+    return imgdata;
+}
+
+
+
+
 bool Ppu::is_screen_enable()
 {
     return (regs[0x01] & 0x08) == 0x08;
