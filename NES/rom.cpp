@@ -18,9 +18,8 @@ Rom::~Rom()
         delete [] chrrom_pages[i];
     }
 }
-void Rom::set_rom()
+void Rom::set_rom(string filename)
 {
-    string filename = "nestest.nes";
     FILE  *f        = fopen(filename.c_str(), "rb");
     fseek(f, 0, SEEK_END);
     const int size = ftell(f);

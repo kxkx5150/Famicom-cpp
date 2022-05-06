@@ -1,18 +1,20 @@
 #include "mapper0.h"
+#include <cstdio>
 
-Mapper0::Mapper0(Rom *_rom)
+Mapper0::Mapper0(Rom *_rom, Ppu *_ppu)
 {
     rom = _rom;
+    ppu = _ppu;
 }
 Mapper0::~Mapper0()
 {
 }
-void Mapper0::set_rom()
+void Mapper0::set_rom(string filename)
 {
     printf("Mapper0 set_rom\n");
-    rom->set_rom();
+    rom->set_rom(filename);
     rom->set_prgrom_page(0, 0);
     rom->set_prgrom_page(1, rom->prg_rom_page_count - 1);
-    // self.ppu.set_chr_rom_page(0, &mut self.rom);
-    // self.ppu.start(&mut self.rom);
+    ppu->set_chr_rom_page(0);
+    ppu->start();
 }

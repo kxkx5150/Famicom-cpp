@@ -6,7 +6,7 @@
 
 using namespace std;
 
-enum mirroring
+enum Mirroring
 {
     VERTICAL,
     HORIZONTAL,
@@ -41,7 +41,7 @@ class Rom {
     Rom();
     ~Rom();
 
-    void set_rom();
+    void set_rom(string filename);
     void create_pages();
     void clear_roms();
     void set_prgrom_page_8k(int page, int rompage);

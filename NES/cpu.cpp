@@ -2,9 +2,10 @@
 #include "cpu_enum.h"
 #include "nestest.h"
 
-Cpu::Cpu(Mem *_mem)
+Cpu::Cpu(Mem *_mem, Irq *_irq)
 {
     mem = _mem;
+    irq = _irq;
     create_opcodes();
     init();
 }
@@ -14,6 +15,8 @@ Cpu::~Cpu()
 void Cpu::init()
 {
     reset();
+    auto data = mem->get16(0xfffc);
+    pc        = data;
 }
 void Cpu::init_nestest()
 {
@@ -43,8 +46,29 @@ void Cpu::reset()
     totalcycle = 7;
     steps      = 0;
 }
+void Cpu::exec_nmi()
+{
+    auto opc = opcodes[256];
+    cpuclock += 7;
+    exe_instruction(opc.opcode, 0);
+}
+void Cpu::exec_irq()
+{
+    auto opc = opcodes[257];
+    cpuclock += 7;
+    exe_instruction(opc.opcode, 0);
+}
 void Cpu::run(bool cputest)
 {
+    std::string istr = irq->check_interrupt(interrupt);
+    if (istr == "nmi") {
+        irq->clear_nmi();
+        exec_nmi();
+    } else if (istr == "irq") {
+        irq->clear_irq();
+        exec_irq();
+    }
+
     uint16_t prepc    = pc;
     uint8_t  instr    = mem->get(pc++);
     auto     optobj   = opcodes[instr];
@@ -61,12 +85,14 @@ void Cpu::run(bool cputest)
         show_state(prepc, op, adrm);
     }
 
-    if (prepc == 0xC7E7) {
-        printf("");
-    }
-
     exe_instruction(optobj.opcode, adrm);
+    size_t cpucycle = cpuclock;
+    totalcycle += cpucycle;
     steps++;
+}
+void Cpu::clear_cpucycle()
+{
+    cpuclock = 0;
 }
 void Cpu::show_state(uint16_t pc, string op, uint16_t adrm)
 {

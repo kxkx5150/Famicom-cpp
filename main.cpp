@@ -11,7 +11,7 @@ int main(int ArgCount, char **Args)
 {
     auto nes = new Nes();
     nes->set_rom();
-    nes->start(true);
+    nes->start();
 
     // SDL_Window *Window =
     //     SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL);

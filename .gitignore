@@ -8,8 +8,9 @@
 *.obj
 *.idx
 *.log
-exe/
 .idea/
-CMakeCache.txt
+.cache/
+build/
+exe/
 
 sm.nes

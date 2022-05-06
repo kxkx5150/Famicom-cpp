@@ -14,7 +14,9 @@ add_executable(${PROJECT_NAME} ${sourcefiles}
     NES/mem.cpp NES/mem.h
     NES/cpu_enum.h
     NES/mapper0.cpp NES/mapper0.h
+    NES/ppu.cpp NES/ppu_port.cpp NES/ppu.h 
     NES/mapper.h
+    NES/irq.h
     NES/nestest.h
     )
 
