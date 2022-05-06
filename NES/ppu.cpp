@@ -155,7 +155,7 @@ void Ppu::render_frame()
 
         if (8 <= line && line < 232) {
             build_bg();
-            build_sp_line();
+            // build_sp_line();
             for (size_t p = 0; p < 256; p++){
                 auto idx = palette[bg_line_buffer[p]];
                 auto pal = PALLETE_TABLE[idx];
@@ -165,7 +165,7 @@ void Ppu::render_frame()
             for (size_t p = 0; p < 264; p++){
                 bg_line_buffer[p] = 0x10;
             }
-            build_sp_line();
+            // build_sp_line();
         }
 
         if ((ppu_addr & 0x7000) == 0x7000) {
@@ -205,7 +205,48 @@ void Ppu::build_bg()
 }
 void Ppu::build_bg_line()
 {
+    size_t nameaddr = 0x2000 | (ppu_addr & 0x0fff);
+    size_t tableaddr =
+        ((ppu_addr & 0x7000) >> 12) | ((regs[0x00] & 0x10) << 8);
+    size_t name_addr_h = nameaddr >> 10;
+    size_t name_addr_l = nameaddr & 0x03ff;
+    size_t pre_name_addrh = name_addr_h;
+    size_t s = h_scroll_val;
+    size_t q = 0;
 
+    for (size_t p = 0; p < 33; p++){
+        auto vrm = vram[pre_name_addrh];
+        size_t ptndist = ((vrm[name_addr_l]) << 4) | tableaddr;
+        auto vvrm = vram[ptndist >> 10];
+        ptndist &= 0x03ff;
+
+        size_t lval = (name_addr_l & 0x0380) >> 4;
+        size_t rval = ((name_addr_l & 0x001c) >> 2) + 0x03c0;
+
+        size_t lval2 = (name_addr_l & 0x0040) >> 4;
+        size_t rval2 = name_addr_l & 0x0002;
+        size_t attr = ((vrm[lval | rval] << 2) >> (lval2 | rval2)) & 0x0c;
+
+        size_t spbidx1 = vvrm[ptndist];
+        size_t spbidx2 = vvrm[(ptndist + 8)];
+        auto ptn = spbit_pattern[spbidx1][spbidx2];
+
+        while (s < 8) {
+            size_t idx = ptn[s] | attr;
+            bg_line_buffer[q] = PALLETE[idx];
+            q += 1;
+            s += 1;
+        }
+        s = 0;
+
+        if ((name_addr_l & 0x001f) == 0x001f) {
+            name_addr_l &= 0xffe0;
+            name_addr_h ^= 0x01;
+            pre_name_addrh = name_addr_h;
+        } else {
+            name_addr_l += 1;
+        }
+    }
     
 }
 void Ppu::build_sp_line()
@@ -231,7 +272,7 @@ void Ppu::post_render()
 }
 void Ppu::set_img_data(std::vector<uint8_t> rgb)
 {
-    uint32_t dots = (0xFF000000 | (200 << 16) | (0 << 8) | 0);
+    uint32_t dots = (0xFF000000 | (rgb[0] << 16) | (rgb[1] << 8) | rgb[2]);
     imgdata[imgidx] = dots;
     imgidx++;
 }

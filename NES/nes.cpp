@@ -10,6 +10,8 @@ Nes::Nes()
     mapper = new Mapper0(rom, ppu);
     mem    = new Mem(mapper);
     cpu    = new Cpu(mem, irq);
+
+    ppu->init();
 }
 Nes::~Nes()
 {
@@ -30,7 +32,7 @@ void Nes::start(bool cputest)
     size_t count = 0;
     if (cputest) {
         cpu->init_nestest();
-        count = 8991;
+        count = 8992;
     } else {
         cpu->init();
     }
