@@ -1,0 +1,15 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+*.idx
+*.log
+exe/
+.idea/
+CMakeCache.txt
+
+sm.nes
