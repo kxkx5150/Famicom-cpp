@@ -16,7 +16,7 @@ void Ppu::init()
 }
 void Ppu::start()
 {
-    printf("ppu start");
+    printf("ppu start\n");
     crate_spbit_array();
     screen_mirroring = rom->screen_mirroring;
     if (screen_mirroring == VERTICAL) {

@@ -12,7 +12,7 @@ class MapperBase {
   public:
     virtual void init()
     {
-        printf("mapperbase init");
+        printf("mapperbase init\n");
     }
     uint8_t read_low(uint16_t addr)
     {

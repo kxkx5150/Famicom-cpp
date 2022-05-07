@@ -3,6 +3,7 @@
 
 #include "dma.h"
 #include "mapper0.h"
+#include "io.h"
 
 
 class Mem {
@@ -10,9 +11,10 @@ class Mem {
     uint8_t  ram[0x800]{};
     Mapper0 *mapper = nullptr;
     Dma     *dma    = nullptr;
+    Io      *io     = nullptr;
 
   public:
-    Mem(Mapper0 *_mapper, Dma *dma);
+    Mem(Mapper0 *_mapper, Dma *dma, Io *_io);
     ~Mem();
     void     init();
     uint8_t  get(uint16_t addr);

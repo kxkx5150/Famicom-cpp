@@ -1,19 +1,30 @@
 #include "nes.h"
+#include <cstdint>
 
-static const int width = 256, height = 224;
+const int     width = 256, height = 224;
+const uint8_t PAD_A      = 0x01;
+const uint8_t PAD_B      = 0x02;
+const uint8_t PAD_SELECT = 0x04;
+const uint8_t PAD_START  = 0x08;
+const uint8_t PAD_U      = 0x10;
+const uint8_t PAD_D      = 0x20;
+const uint8_t PAD_L      = 0x40;
+const uint8_t PAD_R      = 0x80;
 
 Nes::Nes()
 {
+    io     = new Io();
     rom    = new Rom();
     irq    = new Irq();
     ppu    = new Ppu(rom, irq);
     mapper = new Mapper0(rom, ppu);
     dma    = new Dma();
-    mem    = new Mem(mapper, dma);
+    mem    = new Mem(mapper, dma, io);
     cpu    = new Cpu(mem, irq);
 }
 Nes::~Nes()
 {
+    delete io;
     delete rom;
     delete irq;
     delete ppu;
@@ -28,7 +39,7 @@ void Nes::init()
 }
 void Nes::set_rom()
 {
-    string filename = "j.nes";
+    string filename = "sm.nes";
     mapper->set_rom(filename);
 }
 void Nes::start(bool cputest)
@@ -53,20 +64,20 @@ void Nes::main_loop(size_t count, bool cputest)
     renderer     = SDL_CreateRenderer(window, -1, 0);
     MooseTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, width, height);
     SDL_RenderSetScale(renderer, 2.0, 2.0);
+    SDL_Event event;
 
-    size_t i = 0;
-    for (int Running = 1; Running;) {
+    size_t  i    = 0;
+    bool    quit = false;
+    uint8_t pad  = 0;
+
+    while (!quit) {
         i++;
-        if (i == count) {
+        if (i == count)
             break;
-        }
 
-        SDL_Event Event;
-        while (SDL_PollEvent(&Event)) {
-            if (Event.type == SDL_QUIT)
-                Running = 0;
+        if (io->get_ctrllatched()) {
+            io->hdCtrlLatch();
         }
-
         cpu->run(cputest);
         ppu->run(cpu->cpuclock);
         cpu->clear_cpucycle();
@@ -78,6 +89,47 @@ void Nes::main_loop(size_t count, bool cputest)
             SDL_RenderCopy(renderer, MooseTexture, NULL, NULL);
             SDL_RenderPresent(renderer);
         }
+
+        while (SDL_PollEvent(&event)) {
+            switch (event.type) {
+                case SDL_QUIT:
+                    quit = true;
+                    break;
+                case SDL_KEYDOWN:
+                    pad |= keycode_to_pad(event);
+                    io->set_ctrlstat1(pad);
+                    break;
+                case SDL_KEYUP: {
+                    pad &= ~keycode_to_pad(event);
+                    io->set_ctrlstat1(pad);
+                    break;
+                }
+            }
+        }
+    }
+}
+uint8_t Nes::keycode_to_pad(SDL_Event event)
+{
+    auto key = event.key.keysym.sym;
+    switch (key) {
+        case SDLK_x:
+            return PAD_A;
+        case SDLK_z:
+            return PAD_B;
+        case SDLK_a:
+            return PAD_SELECT;
+        case SDLK_s:
+            return PAD_START;
+        case SDLK_RIGHT:
+            return PAD_R;
+        case SDLK_LEFT:
+            return PAD_L;
+        case SDLK_UP:
+            return PAD_U;
+        case SDLK_DOWN:
+            return PAD_D;
+        default:
+            return 0;
     }
 }
 void Nes::UpdateTexture(SDL_Texture *texture, uint32_t *imgdata)

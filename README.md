@@ -38,7 +38,7 @@ https://user-images.githubusercontent.com/10168979/167252280-cf27defe-456b-4261-
 
 
 
-
+<br><br><br>
 
 
 
@@ -55,6 +55,29 @@ Build
 
 ### F5  
 debug
+
+<br><br><br>
+
+## Keyboard
+<pre>
+    case SDLK_x:
+        return PAD_A;
+    case SDLK_z:
+        return PAD_B;
+    case SDLK_a:
+        return PAD_SELECT;
+    case SDLK_s:
+        return PAD_START;
+    case SDLK_RIGHT:
+        return PAD_R;
+    case SDLK_LEFT:
+        return PAD_L;
+    case SDLK_UP:
+        return PAD_U;
+    case SDLK_DOWN:
+        return PAD_D;
+
+</pre>
 
 
 <br><br><br><br><br><br><br><br><br>

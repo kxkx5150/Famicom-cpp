@@ -1,17 +1,18 @@
 #include "mem.h"
 #include <cstdio>
 
-Mem::Mem(Mapper0 *_mapper, Dma *_dma)
+Mem::Mem(Mapper0 *_mapper, Dma *_dma, Io *_io)
 {
     mapper = _mapper;
     dma    = _dma;
+    io     = _io;
 }
 Mem::~Mem()
 {
 }
 void Mem::init()
 {
-    printf("mem init");
+    printf("mem init\n");
     reset();
     mapper->init();
 }
@@ -33,6 +34,19 @@ uint8_t Mem::get(uint16_t addr)
             return 0;
         }
         case 0x4000: {
+            switch (addr) {
+                case 0x4016: {
+                    uint8_t ret = io->get_latched_ctrl_state(1) & 1;
+                    io->set_latched_ctrl_state(1);
+                    return ret | 0x40;
+                }
+                case 0x4017: {
+                    uint8_t ret = io->get_latched_ctrl_state(2) & 1;
+                    io->set_latched_ctrl_state(2);
+                    return ret | 0x40;
+                }
+            }
+
             return 0;
         }
         case 0x6000: {
@@ -97,6 +111,14 @@ void Mem::set(uint16_t addr, uint8_t data)
             switch (addr) {
                 case 0x4014: {
                     dma->run(data, mapper->ppu, ram);
+                    break;
+                }
+                case 0x4016: {
+                    if ((data & 0x01) > 0) {
+                        io->set_ctrllatched(true);
+                    } else {
+                        io->set_ctrllatched(false);
+                    }
                     break;
                 }
             }
