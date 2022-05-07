@@ -18,6 +18,7 @@ Nes::~Nes()
     delete irq;
     delete ppu;
     delete mapper;
+    delete dma;
     delete mem;
     delete cpu;
 }
