@@ -6,6 +6,7 @@
 #include "mem.h"
 #include "ppu.h"
 #include "rom.h"
+#include "dma.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 
@@ -15,6 +16,7 @@ class Nes {
     Rom     *rom;
     Ppu     *ppu;
     Mapper0 *mapper;
+    Dma     *dma;
     Mem     *mem;
     Cpu     *cpu;
 

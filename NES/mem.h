@@ -2,14 +2,16 @@
 #define _H_HEAD1_
 
 #include "mapper0.h"
+#include "dma.h"
 
 class Mem {
   public:
     uint8_t ram[0x800]{};
     Mapper0 *mapper = nullptr;
+    Dma *dma = nullptr;
 
   public:
-    Mem(Mapper0 *_mapper);
+    Mem(Mapper0 *_mapper, Dma *dma);
     ~Mem();
     void init();
     uint8_t get(uint16_t addr);

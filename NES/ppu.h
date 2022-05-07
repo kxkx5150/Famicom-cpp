@@ -8,6 +8,7 @@
 class Ppu {
   public:
     uint32_t imgdata[256 * 240]{};
+    uint8_t sprite_ram[0x100]{};
 
   private:
     Rom *rom = nullptr;
@@ -34,10 +35,9 @@ class Ppu {
     uint8_t vrams[16][1024]{};
 
     uint8_t bg_line_buffer[264]{};
-    uint8_t sp_line_buffer[264]{};
+    uint16_t sp_line_buffer[264]{};
 
     uint8_t palette[33]{};
-    uint8_t sprite_ram[0x100]{};
     uint8_t spbit_pattern[256][256][8]{};
 
 

@@ -17,6 +17,7 @@ add_executable(${PROJECT_NAME} ${sourcefiles}
     NES/ppu.cpp NES/ppu_port.cpp NES/ppu.h 
     NES/mapper.h
     NES/irq.h
+    NES/dma.h
     NES/nestest.h
     )
 

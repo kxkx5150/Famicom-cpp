@@ -2,9 +2,10 @@
 #include <cstdio>
 
 
-Mem::Mem(Mapper0 *_mapper)
+Mem::Mem(Mapper0 *_mapper, Dma *_dma)
 {
     mapper = _mapper;
+    dma = _dma;
 }
 Mem::~Mem()
 {
@@ -94,6 +95,12 @@ void Mem::set(uint16_t addr, uint8_t data)
             break;
         }
         case 0x4000: {
+            switch (addr) {
+                case 0x4014: {
+                    dma->run(data, mapper->ppu, ram);
+                    break;
+                }
+            }
             break;
         }
         case 0x6000: {

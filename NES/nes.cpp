@@ -8,7 +8,8 @@ Nes::Nes()
     irq    = new Irq();
     ppu    = new Ppu(rom, irq);
     mapper = new Mapper0(rom, ppu);
-    mem    = new Mem(mapper);
+    dma    = new Dma();
+    mem    = new Mem(mapper, dma);
     cpu    = new Cpu(mem, irq);
 }
 Nes::~Nes()
@@ -47,15 +48,22 @@ void Nes::main_loop(size_t count, bool cputest)
     SDL_Texture  *MooseTexture;
     SDL_bool      done = SDL_FALSE;
     SDL_Window   *window =
-        SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_SHOWN);
+        SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width*2, height*2, SDL_WINDOW_SHOWN);
     renderer     = SDL_CreateRenderer(window, -1, 0);
     MooseTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, width, height);
+    SDL_RenderSetScale(renderer, 2.0, 2.0);
 
     size_t i = 0;
     for (int Running = 1; Running;) {
         i++;
         if (i == count) {
             break;
+        }
+        
+        SDL_Event Event;
+        while (SDL_PollEvent(&Event)) {
+            if (Event.type == SDL_QUIT)
+                Running = 0;
         }
 
         cpu->run(cputest);
@@ -68,12 +76,6 @@ void Nes::main_loop(size_t count, bool cputest)
             SDL_RenderClear(renderer);
             SDL_RenderCopy(renderer, MooseTexture, NULL, NULL);
             SDL_RenderPresent(renderer);
-        }
-        
-        SDL_Event Event;
-        while (SDL_PollEvent(&Event)) {
-            if (Event.type == SDL_QUIT)
-                Running = 0;
         }
     }
 }

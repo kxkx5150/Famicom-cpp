@@ -138,16 +138,16 @@ void Ppu::run(size_t cpuclock)
             post_render();
         }
     }
-    // if (sprite_zero && (regs[0x02] & 0x40) != 0x40) {
-    //     let i = if ppux > 255 { 255 } else { ppux };
-    //     while tmpx <= i {
-    //         if (sp_line_buffer[tmpx] == 0) {
-    //             regs[0x02] |= 0x40;
-    //             break;
-    //         }
-    //         tmpx += 1;
-    //     }
-    // }
+    if (sprite_zero && (regs[0x02] & 0x40) != 0x40) {
+        size_t i = ppux > 255 ? 255 : ppux;
+        while (tmpx <= i) {
+            if (sp_line_buffer[tmpx] == 0) {
+                regs[0x02] |= 0x40;
+                break;
+            }
+            tmpx += 1;
+        }
+    }
 }
 void Ppu::render_frame()
 {
@@ -156,7 +156,7 @@ void Ppu::render_frame()
 
         if (8 <= line && line < 232) {
             build_bg();
-            // build_sp_line();
+            build_sp_line();
             for (size_t p = 0; p < 256; p++){
                 auto idx = palette[bg_line_buffer[p]];
                 auto pal = PALLETE_TABLE[idx];
@@ -166,7 +166,7 @@ void Ppu::render_frame()
             for (size_t p = 0; p < 264; p++){
                 bg_line_buffer[p] = 0x10;
             }
-            // build_sp_line();
+            build_sp_line();
         }
 
         if ((ppu_addr & 0x7000) == 0x7000) {
@@ -252,6 +252,83 @@ void Ppu::build_bg_line()
 }
 void Ppu::build_sp_line()
 {
+    size_t spclip = (regs[0x01] & 0x04) == 0x04 ? 0 : 8;
+
+    if ((regs[0x01] & 0x10) == 0x10) {
+
+        for (size_t p = 0; p < 264; p++){
+            sp_line_buffer[p] = 256;
+        }
+
+        size_t spptableaddr = ((regs[0x00] & 0x08)) << 9;
+        size_t count = 0;
+        size_t bzsize = is_bigsize();
+
+        for (size_t i = 0; i < 252; i+=4){
+            size_t isy = (sprite_ram[i] + 1);
+            if (isy > line || (isy + bzsize <= line)) {
+                continue;
+            }
+
+            if (i == 0) {
+                sprite_zero = true;
+            }
+
+            count += 1;
+            if (count == 9) {
+                break;
+            }
+
+            size_t attr = sprite_ram[i + 2];
+            size_t attribute = (((attr & 0x03)) << 2) | 0x10;
+            size_t bgsp = (attr & 0x20) == 0x00;
+
+            size_t x = (sprite_ram[i + 3]);
+            size_t ex = x + 8;
+            if (ex > 256) {
+                ex = 256;
+            }
+
+            size_t iy = (attr & 0x80) == 0x80 ? (bzsize - 1 - (line - isy)) : (line - isy);
+            size_t lval = ((sprite_ram[i + 1]) << 4) + spptableaddr;
+            size_t rval = ((sprite_ram[i + 1] & 0xfe) << 4)
+                + ((sprite_ram[i + 1] & 0x01) << 12);
+            size_t sval = bzsize == 8 ? lval : rval;
+
+            size_t tilenum = ((iy & 0x08) << 1) + (iy & 0x07) + sval;
+            size_t tlow = tilenum & 0x03ff;
+
+            size_t is = 7;
+            size_t ia = -1;
+            if ((attr & 0x40) == 0x00) {
+                is = 0;
+                ia = 1;
+            }
+
+            size_t ptnidxl = vram[tilenum >> 10][tlow];
+            size_t ptnidxr = vram[tilenum >> 10][tlow + 8];
+            auto ptn = spbit_pattern[ptnidxl][ptnidxr];
+
+            while (x < ex) {
+
+                size_t tptn = ptn[is];
+                if (tptn != 0x00 && (sp_line_buffer[x] == 256)) {
+                    sp_line_buffer[x] = i;
+                    if (x >= spclip && (bgsp || bg_line_buffer[x] == 0x10)) {
+                        bg_line_buffer[x] = tptn | attribute;
+                    }
+                }
+                x += 1;
+                is += ia;
+            }
+        }
+
+        if (8 <= count) {
+            regs[0x02] |= 0x20;
+        } else {
+            regs[0x02] &= 0xdf;
+        }
+    }
 }
 void Ppu::in_vblank()
 {
