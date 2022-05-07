@@ -1,8 +1,9 @@
 #ifndef _H_CPU
 #define _H_CPU
 
-#include "mem.h"
 #include "irq.h"
+#include "mem.h"
+
 
 using namespace std;
 
@@ -39,7 +40,7 @@ class Cpu {
     size_t steps;
     size_t totalcycle;
     Mem   *mem;
-    Irq *irq;
+    Irq   *irq;
 
   private:
     Opcode opcodes[258];
@@ -55,7 +56,7 @@ class Cpu {
 
     void run(bool cputest);
     void reset();
-    void     clear_cpucycle();
+    void clear_cpucycle();
 
   private:
     void create_opcode(size_t opcode, size_t opint, string hex, string op, size_t adm, size_t cycle);
@@ -73,6 +74,4 @@ class Cpu {
     void show_test_state(uint16_t pc, string op, uint16_t adrm);
 };
 
-
 #endif    // _H_CPU
-

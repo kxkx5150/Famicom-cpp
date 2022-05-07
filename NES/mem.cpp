@@ -1,11 +1,10 @@
 #include "mem.h"
 #include <cstdio>
 
-
 Mem::Mem(Mapper0 *_mapper, Dma *_dma)
 {
     mapper = _mapper;
-    dma = _dma;
+    dma    = _dma;
 }
 Mem::~Mem()
 {

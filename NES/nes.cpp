@@ -38,7 +38,7 @@ void Nes::start(bool cputest)
     if (cputest) {
         cpu->init_nestest();
         count = 8992;
-    }else {
+    } else {
         init();
     }
     main_loop(count, cputest);
@@ -49,7 +49,7 @@ void Nes::main_loop(size_t count, bool cputest)
     SDL_Texture  *MooseTexture;
     SDL_bool      done = SDL_FALSE;
     SDL_Window   *window =
-        SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width*2, height*2, SDL_WINDOW_SHOWN);
+        SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width * 2, height * 2, SDL_WINDOW_SHOWN);
     renderer     = SDL_CreateRenderer(window, -1, 0);
     MooseTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, width, height);
     SDL_RenderSetScale(renderer, 2.0, 2.0);
@@ -60,7 +60,7 @@ void Nes::main_loop(size_t count, bool cputest)
         if (i == count) {
             break;
         }
-        
+
         SDL_Event Event;
         while (SDL_PollEvent(&Event)) {
             if (Event.type == SDL_QUIT)
@@ -70,7 +70,7 @@ void Nes::main_loop(size_t count, bool cputest)
         cpu->run(cputest);
         ppu->run(cpu->cpuclock);
         cpu->clear_cpucycle();
-        if (ppu->get_img_status()){
+        if (ppu->get_img_status()) {
             auto imgdata = ppu->get_img_data();
             ppu->clear_img();
             UpdateTexture(MooseTexture, imgdata);
@@ -80,7 +80,7 @@ void Nes::main_loop(size_t count, bool cputest)
         }
     }
 }
-void Nes::UpdateTexture(SDL_Texture *texture, uint32_t* imgdata)
+void Nes::UpdateTexture(SDL_Texture *texture, uint32_t *imgdata)
 {
     size_t     imgidx = 0;
     SDL_Color *color;

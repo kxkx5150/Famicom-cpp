@@ -8,48 +8,55 @@ class Irq {
     bool irq = false;
 
   public:
-    Irq(){
+    Irq()
+    {
         nmi = false;
         irq = false;
     }
-    ~Irq(){
-
+    ~Irq()
+    {
     }
-    
-    void set_nmi(bool flg){
+
+    void set_nmi(bool flg)
+    {
         nmi = flg;
     }
-    bool get_nmi(){
+    bool get_nmi()
+    {
         return nmi;
     }
-    void set_irq(bool flg){
+    void set_irq(bool flg)
+    {
         irq = flg;
     }
-    bool get_irq(){
+    bool get_irq()
+    {
         return irq;
     }
 
-    std::string check_interrupt(bool interrupt){
-        if (nmi){
+    std::string check_interrupt(bool interrupt)
+    {
+        if (nmi) {
             return "nmi";
-        }else if (interrupt && irq) {
+        } else if (interrupt && irq) {
             return "irq";
-        }else {
+        } else {
             return "";
         }
     }
-    void clear_nmi(){
+    void clear_nmi()
+    {
         nmi = false;
     }
-    void clear_irq(){
+    void clear_irq()
+    {
         irq = false;
     }
-    void clear(){
+    void clear()
+    {
         nmi = false;
         irq = false;
     }
-
-
 };
 
 #endif

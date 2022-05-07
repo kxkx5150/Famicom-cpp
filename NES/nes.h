@@ -1,14 +1,15 @@
 #define SDL_MAIN_HANDLED
 
 #include "cpu.h"
+#include "dma.h"
 #include "irq.h"
 #include "mapper0.h"
 #include "mem.h"
 #include "ppu.h"
 #include "rom.h"
-#include "dma.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
+
 
 class Nes {
   public:

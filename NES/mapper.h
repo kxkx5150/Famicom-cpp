@@ -10,7 +10,7 @@ class MapperBase {
     uint8_t mapper_reg[0x800]{};
 
   public:
-    virtual  void init()
+    virtual void init()
     {
         printf("mapperbase init");
     }

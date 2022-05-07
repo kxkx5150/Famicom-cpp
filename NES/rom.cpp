@@ -14,13 +14,13 @@ Rom::~Rom()
 
     for (int i = 0; i < 16; i++) {
         delete[] roms[i];
-        delete [] prgrom_pages[i];
-        delete [] chrrom_pages[i];
+        delete[] prgrom_pages[i];
+        delete[] chrrom_pages[i];
     }
 }
 void Rom::set_rom(string filename)
 {
-    FILE  *f        = fopen(filename.c_str(), "rb");
+    FILE *f = fopen(filename.c_str(), "rb");
     fseek(f, 0, SEEK_END);
     const int size = ftell(f);
     fseek(f, 0, SEEK_SET);

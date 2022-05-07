@@ -2,8 +2,9 @@
 #define _H_MAPPER0
 
 #include "mapper.h"
-#include "rom.h"
 #include "ppu.h"
+#include "rom.h"
+
 
 using namespace std;
 

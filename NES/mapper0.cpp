@@ -13,7 +13,6 @@ void Mapper0::init()
 {
     printf("Mapper0 init\n");
     ppu->init();
-    
 }
 void Mapper0::set_rom(string filename)
 {
