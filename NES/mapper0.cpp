@@ -9,6 +9,12 @@ Mapper0::Mapper0(Rom *_rom, Ppu *_ppu)
 Mapper0::~Mapper0()
 {
 }
+void Mapper0::init()
+{
+    printf("Mapper0 init\n");
+    ppu->init();
+    
+}
 void Mapper0::set_rom(string filename)
 {
     printf("Mapper0 set_rom\n");

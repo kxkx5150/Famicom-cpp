@@ -1,5 +1,6 @@
 #include "ppu.h"
 #include <corecrt.h>
+#include <cstdio>
 
 
 Ppu::Ppu(Rom *_rom, Irq *_irq)
@@ -82,16 +83,16 @@ void Ppu::set_chr_rom_data1k(size_t page, size_t romPage)
 {
     if (0x0100 <= romPage) {
         rom->chrrom_state[page] = romPage;
-
+        auto prom = vrams[romPage& 0xff];
         for (size_t i = 0; i < 1024; i++) {
-            vram[page][i] = vrams[romPage][i];
+            vram[page][i] = prom[i];
         }
     } else if (0 < rom->chr_rom_page_count) {
         size_t tmp              = romPage % (rom->chr_rom_page_count * 8);
         rom->chrrom_state[page] = tmp;
 
         auto prom = rom->chrrom_pages[rom->chrrom_state[page]];
-        auto len  = rom->prgrom_page_len[rom->chrrom_state[page]];
+        auto len  = rom->chrrom_page_len[rom->chrrom_state[page]];
 
         for (size_t i = 0; i < len; i++) {
             vram[page][i] = prom[i];

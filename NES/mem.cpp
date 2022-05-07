@@ -1,6 +1,6 @@
 #include "mem.h"
+#include <cstdio>
 
-#define SIZE_OF_ARRAY(array) (sizeof(array) / sizeof(array[0]))
 
 Mem::Mem(Mapper0 *_mapper)
 {
@@ -11,6 +11,9 @@ Mem::~Mem()
 }
 void Mem::init()
 {
+    printf("mem init");
+    reset();
+    mapper->init();
 }
 uint8_t Mem::get(uint16_t addr)
 {
@@ -55,47 +58,62 @@ void Mem::set(uint16_t addr, uint8_t data)
     switch (addr & 0xe000) {
         case 0x0000: {
             ram[addr & 0x7ff] = data;
+            break;
         }
         case 0x2000: {
             switch (addr & 0x0007) {
                 case 0x00: {
                     mapper->ppu->write_ppu_ctrl0_reg(data);
+                    break;
                 }
                 case 0x01: {
                     mapper->ppu->write_ppu_ctrl1_reg(data);
+                    break;
                 }
                 case 0x03: {
                     mapper->ppu->write_sprite_addr_reg(data);
+                    break;
                 }
                 case 0x04: {
                     mapper->ppu->write_sprite_data(data);
+                    break;
                 }
                 case 0x05: {
                     mapper->ppu->write_scroll_reg(data);
+                    break;
                 }
                 case 0x06: {
                     mapper->ppu->write_ppu_addr_reg(data);
+                    break;
                 }
                 case 0x07: {
                     mapper->ppu->write_ppu_data_reg(data);
+                    break;
                 }
             }
+            break;
         }
         case 0x4000: {
+            break;
         }
         case 0x6000: {
+            break;
         }
         case 0x8000: {
             mapper->write(addr, data);
+            break;
         }
         case 0xa000: {
             mapper->write(addr, data);
+            break;
         }
         case 0xc000: {
             mapper->write(addr, data);
+            break;
         }
         case 0xe000: {
             mapper->write(addr, data);
+            break;
         }
     }
 }
@@ -108,7 +126,7 @@ uint16_t Mem::get16(uint16_t addr)
 }
 void Mem::reset()
 {
-    for (size_t i = 0; i < SIZE_OF_ARRAY(ram); i++) {
+    for (size_t i = 0; i < 0x800; i++) {
         ram[i] = 0;
     }
 }

@@ -10,8 +10,6 @@ Nes::Nes()
     mapper = new Mapper0(rom, ppu);
     mem    = new Mem(mapper);
     cpu    = new Cpu(mem, irq);
-
-    ppu->init();
 }
 Nes::~Nes()
 {
@@ -22,6 +20,10 @@ Nes::~Nes()
     delete mem;
     delete cpu;
 }
+void Nes::init()
+{
+    cpu->init();
+}
 void Nes::set_rom()
 {
     string filename = "sm.nes";
@@ -29,12 +31,13 @@ void Nes::set_rom()
 }
 void Nes::start(bool cputest)
 {
+    // cputest = true;
     size_t count = 0;
     if (cputest) {
         cpu->init_nestest();
         count = 8992;
-    } else {
-        cpu->init();
+    }else {
+        init();
     }
     main_loop(count, cputest);
 }

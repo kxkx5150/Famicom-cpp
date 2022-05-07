@@ -49,7 +49,12 @@ uint8_t Ppu::read_ppu_data_reg()
 {
     auto tmp = ppu_read_buffer;
     uint32_t addr = ppu_addr & 0x3fff;
+    auto aryidx = addr >> 10;
+    auto idx = addr & 0x03ff;
+
+
     ppu_read_buffer = vram[addr >> 10][addr & 0x03ff];
+
     uint32_t val = (regs[0x00] & 0x04) == 0x04 ? 32 : 1;
     ppu_addr = (ppu_addr + val) & 0xffff;
     return tmp;

@@ -10,8 +10,9 @@ class MapperBase {
     uint8_t mapper_reg[0x800]{};
 
   public:
-    void init()
+    virtual  void init()
     {
+        printf("mapperbase init");
     }
     uint8_t read_low(uint16_t addr)
     {

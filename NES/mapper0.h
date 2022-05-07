@@ -16,6 +16,7 @@ class Mapper0 : public MapperBase {
     Mapper0(Rom *_rom, Ppu *_ppu);
     ~Mapper0();
 
+    void init();
     void set_rom(string filename);
 };
 

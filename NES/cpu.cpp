@@ -6,15 +6,15 @@ Cpu::Cpu(Mem *_mem, Irq *_irq)
 {
     mem = _mem;
     irq = _irq;
-    create_opcodes();
-    init();
 }
 Cpu::~Cpu()
 {
 }
 void Cpu::init()
 {
+    mem->init();
     reset();
+    create_opcodes();
     auto data = mem->get16(0xfffc);
     pc        = data;
 }
@@ -114,12 +114,12 @@ void Cpu::show_test_state(uint16_t pc, string op, uint16_t adrm)
     // string okstr = NESTEST_CYCLES.at(steps);
     string okstr = NESTEST_REGS.at(steps);
 
-    printf("\n");
-    printf("OK : %s\n", okstr.c_str());
-    printf("   : %s\n", teststr.c_str());
-    printf("pc         : %04X\n", pc);
-    printf("opcode     : %s\n", op.c_str());
-    printf("cycles     : %d\n", totalcycle);
+    // printf("\n");
+    // printf("OK : %s\n", okstr.c_str());
+    // printf("   : %s\n", teststr.c_str());
+    // printf("pc         : %04X\n", pc);
+    // printf("opcode     : %s\n", op.c_str());
+    printf("totalcycle     : %d\n", totalcycle);
 
     if (teststr != okstr) {
         printf("\n\n----------- error -----------\n");

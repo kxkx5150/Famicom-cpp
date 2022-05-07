@@ -22,6 +22,7 @@ class Nes {
     Nes();
     ~Nes();
 
+    void init();
     void set_rom();
     void start(bool cputest = false);
     void main_loop(size_t count, bool cputest);
