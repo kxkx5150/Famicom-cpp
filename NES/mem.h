@@ -4,6 +4,7 @@
 #include "dma.h"
 #include "mapper0.h"
 #include "io.h"
+#include "apu/Apu.h"
 
 
 class Mem {
@@ -12,9 +13,10 @@ class Mem {
     Mapper0 *mapper = nullptr;
     Dma     *dma    = nullptr;
     Io      *io     = nullptr;
+    Apu     *apu    = nullptr;
 
   public:
-    Mem(Mapper0 *_mapper, Dma *dma, Io *_io);
+    Mem(Mapper0 *_mapper, Dma *dma, Io *_io, Apu *_apu);
     ~Mem();
     void     init();
     uint8_t  get(uint16_t addr);

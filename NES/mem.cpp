@@ -1,11 +1,12 @@
 #include "mem.h"
 #include <cstdio>
 
-Mem::Mem(Mapper0 *_mapper, Dma *_dma, Io *_io)
+Mem::Mem(Mapper0 *_mapper, Dma *_dma, Io *_io, Apu *_apu)
 {
     mapper = _mapper;
     dma    = _dma;
     io     = _io;
+    apu    = _apu;
 }
 Mem::~Mem()
 {
@@ -35,6 +36,31 @@ uint8_t Mem::get(uint16_t addr)
         }
         case 0x4000: {
             switch (addr) {
+                // APU
+                case 0x4000:
+                case 0x4001:
+                case 0x4002:
+                case 0x4003:
+                case 0x4004:
+                case 0x4005:
+                case 0x4006:
+                case 0x4007:
+                case 0x4008:
+                case 0x4009:
+                case 0x400a:
+                case 0x400b:
+                case 0x400c:
+                case 0x400d:
+                case 0x400e:
+                case 0x400f:
+                case 0x4010:
+                case 0x4011:
+                case 0x4012:
+                case 0x4013:
+                case 0x4014:
+                case 0x4015: {
+                    return apu->HandleCpuRead(addr);
+                }
                 case 0x4016: {
                     uint8_t ret = io->get_latched_ctrl_state(1) & 1;
                     io->set_latched_ctrl_state(1);
@@ -109,16 +135,51 @@ void Mem::set(uint16_t addr, uint8_t data)
         }
         case 0x4000: {
             switch (addr) {
+                // APU
+                case 0x4000:
+                case 0x4001:
+                case 0x4002:
+                case 0x4003:
+                case 0x4004:
+                case 0x4005:
+                case 0x4006:
+                case 0x4007:
+                case 0x4008:
+                case 0x4009:
+                case 0x400a:
+                case 0x400b:
+                case 0x400c:
+                case 0x400d:
+                case 0x400e:
+                case 0x400f:
+                case 0x4010:
+                case 0x4011:
+                case 0x4012:
+                case 0x4013: {
+                    apu->HandleCpuWrite(addr, data);
+                    break;
+                }
+
                 case 0x4014: {
                     dma->run(data, mapper->ppu, ram);
                     break;
                 }
+
+                case 0x4015: {
+                    apu->HandleCpuWrite(addr, data);
+                    break;
+                }
+
                 case 0x4016: {
                     if ((data & 0x01) > 0) {
                         io->set_ctrllatched(true);
                     } else {
                         io->set_ctrllatched(false);
                     }
+                    break;
+                }
+                case 0x4017: {
+                    apu->HandleCpuWrite(addr, data);
                     break;
                 }
             }

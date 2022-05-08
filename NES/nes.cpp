@@ -1,5 +1,6 @@
 #include "nes.h"
 #include <cstdint>
+#include <cstdio>
 
 const int     width = 256, height = 224;
 const uint8_t PAD_A      = 0x01;
@@ -19,7 +20,9 @@ Nes::Nes()
     ppu    = new Ppu(rom, irq);
     mapper = new Mapper0(rom, ppu);
     dma    = new Dma();
-    mem    = new Mem(mapper, dma, io);
+
+    apu    = new Apu();
+    mem    = new Mem(mapper, dma, io, apu);
     cpu    = new Cpu(mem, irq);
 }
 Nes::~Nes()
@@ -36,10 +39,12 @@ Nes::~Nes()
 void Nes::init()
 {
     cpu->init();
+    apu->Initialize();
 }
 void Nes::set_rom()
 {
-    string filename = "j.nes";
+    printf("Nes setrom\n");
+    string filename = "sm.nes";
     mapper->set_rom(filename);
 }
 void Nes::start(bool cputest)
@@ -80,7 +85,9 @@ void Nes::main_loop(size_t count, bool cputest)
         }
         cpu->run(cputest);
         ppu->run(cpu->cpuclock);
+		apu->Execute(cpu->cpuclock);
         cpu->clear_cpucycle();
+
         if (ppu->get_img_status()) {
             auto imgdata = ppu->get_img_data();
             ppu->clear_img();

@@ -8,6 +8,7 @@
 #include "mem.h"
 #include "ppu.h"
 #include "rom.h"
+#include "apu/Apu.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 
@@ -21,7 +22,8 @@ class Nes {
     Dma     *dma;
     Mem     *mem;
     Cpu     *cpu;
-
+    Apu     *apu;
+    
   public:
     Nes();
     ~Nes();
