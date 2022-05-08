@@ -40,6 +40,7 @@ void Nes::init()
 {
     cpu->init();
     apu->Initialize();
+    apu->Reset();
 }
 void Nes::set_rom()
 {

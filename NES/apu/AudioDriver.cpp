@@ -4,6 +4,9 @@
 #define SDL_MAIN_HANDLED // Don't use SDL's main impl
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_audio.h>
+#include <cmath>
+#include <limits>
+
 
 #define OUTPUT_RAW_AUDIO_FILE_STREAM 0
 
@@ -42,7 +45,8 @@ public:
 	void Initialize()
 	{
 		SDL_InitSubSystem(SDL_INIT_AUDIO);
-			
+
+
 		SDL_AudioSpec desired;
 		SDL_zero(desired);
 		desired.freq = kSampleRate;
@@ -52,6 +56,10 @@ public:
 		desired.callback = AudioCallback;
 		desired.userdata = this;
 
+		int i, count = SDL_GetNumAudioDevices(0);
+		for (i = 0; i < count; ++i) {
+			printf("device %d: %s\n", i, SDL_GetAudioDeviceName(i, 0));
+		}
 		m_audioDeviceID = SDL_OpenAudioDevice(NULL, 0, &desired, NULL/*&m_audioSpec*/, SDL_AUDIO_ALLOW_ANY_CHANGE);
 		m_audioSpec = desired;
 
@@ -100,25 +108,24 @@ public:
 
 	void AddSampleF32(float32 sample)
 	{
-		// assert(sample >= 0.0f && sample <= 1.0f);
-		// //@TODO: This multiply is wrong for signed format types (S16, S32)
-		// float targetSample = sample * std::numeric_limits<SampleFormatType>::max();
+		assert(sample >= 0.0f && sample <= 1.0f);
+		//@TODO: This multiply is wrong for signed format types (S16, S32)
+		float targetSample = sample * (std::numeric_limits<SampleFormatType>::max)();
+		SDL_LockAudioDevice(m_audioDeviceID);
+		m_samples.PushBack(static_cast<SampleFormatType>(targetSample));
+		SDL_UnlockAudioDevice(m_audioDeviceID);
 
-		// SDL_LockAudioDevice(m_audioDeviceID);
-		// m_samples.PushBack(static_cast<SampleFormatType>(targetSample));
-		// SDL_UnlockAudioDevice(m_audioDeviceID);
-
-		// // Unpause when buffer is half full; pause if almost depleted to give buffer a chance to
-		// // fill up again.
-		// const auto bufferUsageRatio = GetBufferUsageRatio();
-		// if (bufferUsageRatio >= 0.5f)
-		// {
-		// 	SetPaused(false);
-		// }
-		// else if (bufferUsageRatio < 0.1f)
-		// {
-		// 	SetPaused(true);
-		// }
+		// Unpause when buffer is half full; pause if almost depleted to give buffer a chance to
+		// fill up again.
+		const auto bufferUsageRatio = GetBufferUsageRatio();
+		if (bufferUsageRatio >= 0.5f)
+		{
+			SetPaused(false);
+		}
+		else if (bufferUsageRatio < 0.1f)
+		{
+			SetPaused(true);
+		}
 
 	#if OUTPUT_RAW_AUDIO_FILE_STREAM
 		m_rawAudioOutputFS.WriteValue(sample);
