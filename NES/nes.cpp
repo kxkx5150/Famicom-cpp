@@ -21,6 +21,7 @@ Nes::Nes()
     dma    = new Dma();
     mem    = new Mem(mapper, dma, io);
     cpu    = new Cpu(mem, irq);
+    sq     = new Sound_Queue();
 }
 Nes::~Nes()
 {
@@ -36,6 +37,8 @@ Nes::~Nes()
 void Nes::init()
 {
     mem->init();    
+    cpu->init();
+    sq->init(96000);
 }
 void Nes::set_rom()
 {
@@ -44,7 +47,7 @@ void Nes::set_rom()
 }
 void Nes::start(bool cputest)
 {
-    cpu->init();
+    init();
     // cputest = true;
     size_t count = 0;
     if (cputest) {
