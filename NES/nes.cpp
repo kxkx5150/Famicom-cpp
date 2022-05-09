@@ -35,7 +35,7 @@ Nes::~Nes()
 }
 void Nes::init()
 {
-    cpu->init();
+    mem->init();    
 }
 void Nes::set_rom()
 {
@@ -44,13 +44,12 @@ void Nes::set_rom()
 }
 void Nes::start(bool cputest)
 {
+    cpu->init();
     // cputest = true;
     size_t count = 0;
     if (cputest) {
         cpu->init_nestest();
         count = 8992;
-    } else {
-        init();
     }
     main_loop(count, cputest);
 }
