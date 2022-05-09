@@ -47,7 +47,7 @@ void Nes::init()
 }
 void Nes::set_rom()
 {
-    string filename = "sm.nes";
+    string filename = "j.nes";
     mapper->set_rom(filename);
 }
 void Nes::start(bool cputest)
