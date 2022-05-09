@@ -1,5 +1,7 @@
 #define SDL_MAIN_HANDLED
 
+#include "apu/Queue.h"
+#include "apu/apu.h"
 #include "cpu.h"
 #include "dma.h"
 #include "io.h"
@@ -10,7 +12,6 @@
 #include "rom.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
-#include "apu/Sound_Queue.h"
 
 class Nes {
   public:
@@ -22,8 +23,8 @@ class Nes {
     Dma     *dma;
     Mem     *mem;
     Cpu     *cpu;
-
-    Sound_Queue *sq;
+    Queue   *sq;
+    APU     *apu;
 
   public:
     Nes();

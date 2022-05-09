@@ -19,9 +19,10 @@ Nes::Nes()
     ppu    = new Ppu(rom, irq);
     mapper = new Mapper0(rom, ppu);
     dma    = new Dma();
-    mem    = new Mem(mapper, dma, io);
+    apu    = new APU();
+    mem    = new Mem(mapper, dma, io, apu);
     cpu    = new Cpu(mem, irq);
-    sq     = new Sound_Queue();
+    sq     = new Queue();
 }
 Nes::~Nes()
 {
@@ -31,18 +32,22 @@ Nes::~Nes()
     delete ppu;
     delete mapper;
     delete dma;
+    delete apu;
     delete mem;
     delete cpu;
+    delete sq;
 }
 void Nes::init()
 {
-    mem->init();    
+    mem->init();
     cpu->init();
     sq->init(96000);
+    apu->reset();
+    apu->set_speed(1.0);
 }
 void Nes::set_rom()
 {
-    string filename = "j.nes";
+    string filename = "sm.nes";
     mapper->set_rom(filename);
 }
 void Nes::start(bool cputest)
@@ -81,8 +86,15 @@ void Nes::main_loop(size_t count, bool cputest)
             io->hdCtrlLatch();
         }
         cpu->run(cputest);
+
+        for (uint32_t i = 0; i < cpu->cpuclock; i++)
+            this->apu->cycle();
+        if (this->apu->stall_cpu())
+            cpu->cpuclock += 4;
+
         ppu->run(cpu->cpuclock);
         cpu->clear_cpucycle();
+
         if (ppu->get_img_status()) {
             auto imgdata = ppu->get_img_data();
             ppu->clear_img();
@@ -108,6 +120,12 @@ void Nes::main_loop(size_t count, bool cputest)
                 }
             }
         }
+        float *samples = nullptr;
+        uint32_t count = 0;
+        apu->getAudiobuff(&samples, &count);
+        if (count)
+            sq->write(samples, count);
+
     }
 }
 uint8_t Nes::keycode_to_pad(SDL_Event event)
