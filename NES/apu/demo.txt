@@ -1,14 +1,6 @@
 
-// Using the APU in an emulator
-// ----------------------------
-//
-// Two code skeletons are shown below. The first shows how to add basic APU support to an
-// emulator that doesn't keep track of overall CPU time. The second shows how to add full
-// APU support (including IRQs) to a framework which keeps track of overall CPU time.
-
-// Basic APU support
-// -----------------
-
+### Basic APU support
+```c++
 #include "Nes_Apu.h"
 
 Blip_Buffer buf;
@@ -66,8 +58,7 @@ void end_time_frame( int length )
 	buf.end_frame( length );
 	total_cycles -= length;     
 	
-	// Read some samples out of Blip_Buffer if there are enough to
-	// fill our output buffer
+	// Read some samples out of Blip_Buffer if there are enough to fill our output buffer
 	if ( buf.samples_avail() >= out_size )
 	{
 		size_t count = buf.read_samples( out_buf, out_size );
@@ -83,7 +74,7 @@ void render_frame()
 
 void init()
 {
-	blargg_err_t error = buf.sample_rate( 44100 );
+	std::error_condition error = buf.sample_rate( 44100 );
 	if ( error )
 		report_error( error );
 	buf.clock_rate( 1789773 );
@@ -91,11 +82,10 @@ void init()
 	
 	apu.dmc_reader( dmc_read );
 }
+```
 
-
-// Full APU support
-// ----------------
-
+### Full APU support
+```c++
 #include "Nes_Apu.h"
 
 Blip_Buffer buf;
@@ -124,7 +114,7 @@ int cpu_read_memory( cpu_addr_t addr )
 		return apu.read_status( cpu_time );
 }
 
-int dmc_read( void*, cpu_addr_t addr )
+int dmc_read( cpu_addr_t addr )
 {
 	return cpu_read_memory( addr );
 }
@@ -162,7 +152,7 @@ cpu_time_t earliest_irq_before( cpu_time_t end_time )
 }
 
 // IRQ time may have changed, so update CPU end time
-void irq_changed( void* )
+void irq_changed()
 {
 	cpu_end_time = earliest_irq_before( cpu_end_time );
 }
@@ -199,8 +189,7 @@ void end_time_frame( cpu_time_t length )
 	buf.end_frame( length );
 	cpu_time -= length;     
 	
-	// Read some samples out of Blip_Buffer if there are enough to
-	// fill our output buffer
+	// Read some samples out of Blip_Buffer if there are enough to fill our output buffer
 	if ( buf.samples_avail() >= out_size )
 	{
 		size_t count = buf.read_samples( out_buf, out_size );
@@ -222,13 +211,13 @@ void render_video_frame()
 
 void init()
 {
-	blargg_err_t error = buf.sample_rate( 44100 );
+	std::error_condition error = buf.sample_rate( 44100 );
 	if ( error )
 		report_error( error );
 	buf.clock_rate( 1789773 );
 	apu.output( &buf );
 	
-	apu.dmc_reader( dmc_read );
-	apu.irq_notifier( irq_changed );
+	apu.dmc_reader = dmc_read;
+	apu.irq_notifier = irq_changed;
 }
-
+```

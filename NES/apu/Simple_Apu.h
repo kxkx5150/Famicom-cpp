@@ -1,13 +1,12 @@
-
 // NES 2A03 APU sound chip emulator with simpler interface
 
-// Nes_Snd_Emu 0.1.7. Copyright (C) 2003-2005 Shay Green. GNU LGPL license.
+// Nes_Snd_Emu Copyright (C) 2003-2005 Shay Green. GNU LGPL license.
 
 #ifndef SIMPLE_APU_H
 #define SIMPLE_APU_H
 
-#include "nes_apu/Nes_Apu.h"
-#include "nes_apu/Blip_Buffer.h"
+#include "Nes_Apu.h"
+#include "Blip_Buffer.h"
 
 class Simple_Apu {
 public:
@@ -19,13 +18,13 @@ public:
 	// clock-cycle accurate register read/write and IRQ timing functions.
 	
 	// Set function for APU to call when it needs to read memory (DMC samples)
-	void dmc_reader( int (*callback)( void* user_data, cpu_addr_t ), void* user_data = NULL );
+	void dmc_reader( int (*callback)( void* user_data, int ), void* user_data = NULL );
 	
 	// Set output sample rate
-	blargg_err_t sample_rate( long rate );
+	std::error_condition sample_rate( long rate );
 	
 	// Write to register (0x4000-0x4017, except 0x4014 and 0x4016)
-	void write_register( cpu_addr_t, int data );
+	void write_register(int addr, int data );
 	
 	// Read from status register at 0x4015
 	int read_status();
@@ -41,8 +40,8 @@ public:
 	long read_samples( sample_t* buf, long buf_size );
 	
 	// Save/load snapshot of emulation state
-	void save_snapshot( apu_snapshot_t* out ) const;
-	void load_snapshot( apu_snapshot_t const& );
+	//void save_snapshot( apu_snapshot_t* out ) const;
+	//void load_snapshot( apu_snapshot_t const& );
 	
 private:
 	Nes_Apu apu;

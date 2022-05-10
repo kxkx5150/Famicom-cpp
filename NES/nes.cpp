@@ -41,9 +41,9 @@ void Nes::init()
 {
     mem->init();
     cpu->init();
-    apu->sample_rate(44100);
-    init_sound();
     mapper->init();
+    sound_queue->init(44100);
+    apu->sample_rate(44100);
 }
 void Nes::set_rom()
 {
@@ -72,10 +72,15 @@ void Nes::main_loop(size_t count, bool cputest)
     MooseTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, width, height);
     SDL_RenderSetScale(renderer, 2.0, 2.0);
     SDL_Event event;
+    SDL_SetMainReady();
+    if (SDL_Init(SDL_INIT_AUDIO) < 0)
+        exit(EXIT_FAILURE);
+    atexit(SDL_Quit);
 
-    size_t  i    = 0;
-    bool    quit = false;
-    uint8_t pad  = 0;
+    size_t        i    = 0;
+    bool          quit = false;
+    uint8_t       pad  = 0;
+    blip_sample_t buf[2048];
 
     while (!quit) {
         i++;
@@ -92,11 +97,15 @@ void Nes::main_loop(size_t count, bool cputest)
         if (ppu->get_img_status()) {
             auto imgdata = ppu->get_img_data();
             ppu->clear_img();
+
+            apu->end_frame();
+            long count = apu->read_samples(buf, sizeof(buf) / sizeof(blip_sample_t));
+            sound_queue->write(buf, count);
+
             UpdateTexture(MooseTexture, imgdata);
             SDL_RenderClear(renderer);
             SDL_RenderCopy(renderer, MooseTexture, NULL, NULL);
             SDL_RenderPresent(renderer);
-            emulate_frame();
         }
 
         while (SDL_PollEvent(&event)) {
@@ -159,32 +168,4 @@ void Nes::UpdateTexture(SDL_Texture *texture, uint32_t *imgdata)
         }
     }
     SDL_UnlockTexture(texture);
-}
-void Nes::emulate_frame()
-{
-    apu->end_frame();
-    int const            buf_size = 2048;
-    static blip_sample_t buf[buf_size];
-    long                 count = apu->read_samples(buf, buf_size);
-    play_samples(buf, count);
-}
-void Nes::init_sound()
-{
-    if (SDL_Init(SDL_INIT_AUDIO) < 0)
-        exit(EXIT_FAILURE);
-
-    atexit(SDL_Quit);
-    if (!sound_queue)
-        exit(EXIT_FAILURE);
-
-    if (sound_queue->init(44100))
-        exit(EXIT_FAILURE);
-}
-void Nes::cleanup_sound()
-{
-    delete sound_queue;
-}
-void Nes::play_samples(const blip_sample_t *samples, long count)
-{
-    sound_queue->write(samples, count);
 }

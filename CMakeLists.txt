@@ -8,8 +8,7 @@ link_directories(./lib)
 
 file(GLOB sourcefiles 
     "*.h" "*.cpp" "NES/*.h" "NES/*.cpp" 
-    "NES/apu/Nes_Snd_Emu-0.1.7/*.h" "NES/apu/Nes_Snd_Emu-0.1.7/*.cpp"
-    "NES/apu/Nes_Snd_Emu-0.1.7/nes_apu/*.h" "NES/apu/Nes_Snd_Emu-0.1.7/nes_apu/*.cpp"
+    "NES/apu/*.h" "NES/apu/*.cpp"
     )
 add_executable(${PROJECT_NAME} ${sourcefiles})
 

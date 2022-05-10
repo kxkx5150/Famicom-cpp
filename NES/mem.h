@@ -1,11 +1,11 @@
 #ifndef _H_HEAD1_
 #define _H_HEAD1_
 
-#include "apu/Nes_Snd_Emu-0.1.7/Simple_Apu.h"
-#include "apu/Nes_Snd_Emu-0.1.7/Sound_Queue.h"
 #include "dma.h"
 #include "io.h"
 #include "mapper0.h"
+#include "apu/Simple_Apu.h"
+
 
 class Mem {
   public:
