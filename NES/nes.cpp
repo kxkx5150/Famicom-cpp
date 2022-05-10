@@ -13,16 +13,16 @@ const uint8_t PAD_R      = 0x80;
 
 Nes::Nes()
 {
-    io     = new Io();
-    rom    = new Rom();
-    irq    = new Irq();
-    ppu    = new Ppu(rom, irq);
-    mapper = new Mapper0(rom, ppu);
-    dma    = new Dma();
-    apu    = new APU();
-    mem    = new Mem(mapper, dma, io, apu);
-    cpu    = new Cpu(mem, irq);
-    sq     = new Queue();
+    io          = new Io();
+    rom         = new Rom();
+    irq         = new Irq();
+    ppu         = new Ppu(rom, irq);
+    mapper      = new Mapper0(rom, ppu);
+    dma         = new Dma();
+    apu         = new Simple_Apu();
+    sound_queue = new Sound_Queue;
+    mem         = new Mem(mapper, dma, io, apu);
+    cpu         = new Cpu(mem, irq);
 }
 Nes::~Nes()
 {
@@ -33,17 +33,17 @@ Nes::~Nes()
     delete mapper;
     delete dma;
     delete apu;
+    delete sound_queue;
     delete mem;
     delete cpu;
-    delete sq;
 }
 void Nes::init()
 {
     mem->init();
     cpu->init();
-    sq->init(96000);
-    apu->reset();
-    apu->set_speed(1.0);
+    apu->sample_rate(44100);
+    init_sound();
+    mapper->init();
 }
 void Nes::set_rom()
 {
@@ -86,12 +86,6 @@ void Nes::main_loop(size_t count, bool cputest)
             io->hdCtrlLatch();
         }
         cpu->run(cputest);
-
-        for (uint32_t i = 0; i < cpu->cpuclock; i++)
-            this->apu->cycle();
-        if (this->apu->stall_cpu())
-            cpu->cpuclock += 4;
-
         ppu->run(cpu->cpuclock);
         cpu->clear_cpucycle();
 
@@ -102,6 +96,7 @@ void Nes::main_loop(size_t count, bool cputest)
             SDL_RenderClear(renderer);
             SDL_RenderCopy(renderer, MooseTexture, NULL, NULL);
             SDL_RenderPresent(renderer);
+            emulate_frame();
         }
 
         while (SDL_PollEvent(&event)) {
@@ -120,12 +115,6 @@ void Nes::main_loop(size_t count, bool cputest)
                 }
             }
         }
-        float *samples = nullptr;
-        uint32_t count = 0;
-        apu->getAudiobuff(&samples, &count);
-        if (count)
-            sq->write(samples, count);
-
     }
 }
 uint8_t Nes::keycode_to_pad(SDL_Event event)
@@ -170,4 +159,32 @@ void Nes::UpdateTexture(SDL_Texture *texture, uint32_t *imgdata)
         }
     }
     SDL_UnlockTexture(texture);
+}
+void Nes::emulate_frame()
+{
+    apu->end_frame();
+    int const            buf_size = 2048;
+    static blip_sample_t buf[buf_size];
+    long                 count = apu->read_samples(buf, buf_size);
+    play_samples(buf, count);
+}
+void Nes::init_sound()
+{
+    if (SDL_Init(SDL_INIT_AUDIO) < 0)
+        exit(EXIT_FAILURE);
+
+    atexit(SDL_Quit);
+    if (!sound_queue)
+        exit(EXIT_FAILURE);
+
+    if (sound_queue->init(44100))
+        exit(EXIT_FAILURE);
+}
+void Nes::cleanup_sound()
+{
+    delete sound_queue;
+}
+void Nes::play_samples(const blip_sample_t *samples, long count)
+{
+    sound_queue->write(samples, count);
 }

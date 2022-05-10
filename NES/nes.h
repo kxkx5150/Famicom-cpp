@@ -1,7 +1,7 @@
 #define SDL_MAIN_HANDLED
 
-#include "apu/Queue.h"
-#include "apu/apu.h"
+#include "apu/Nes_Snd_Emu-0.1.7/Simple_Apu.h"
+#include "apu/Nes_Snd_Emu-0.1.7/Sound_Queue.h"
 #include "cpu.h"
 #include "dma.h"
 #include "io.h"
@@ -14,17 +14,18 @@
 #include <SDL2/SDL_opengl.h>
 
 class Nes {
+
   public:
-    Io      *io;
-    Irq     *irq;
-    Rom     *rom;
-    Ppu     *ppu;
-    Mapper0 *mapper;
-    Dma     *dma;
-    Mem     *mem;
-    Cpu     *cpu;
-    Queue   *sq;
-    APU     *apu;
+    Io          *io;
+    Irq         *irq;
+    Rom         *rom;
+    Ppu         *ppu;
+    Mapper0     *mapper;
+    Dma         *dma;
+    Mem         *mem;
+    Cpu         *cpu;
+    Simple_Apu  *apu         = nullptr;
+    Sound_Queue *sound_queue = nullptr;
 
   public:
     Nes();
@@ -36,4 +37,9 @@ class Nes {
     void    main_loop(size_t count, bool cputest);
     uint8_t keycode_to_pad(SDL_Event event);
     void    UpdateTexture(SDL_Texture *texture, uint32_t *imgdata);
+
+    void emulate_frame();
+    void init_sound();
+    void cleanup_sound();
+    void play_samples(const blip_sample_t *samples, long count);
 };

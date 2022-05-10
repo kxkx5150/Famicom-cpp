@@ -1,7 +1,7 @@
 #include "mem.h"
 #include <cstdio>
 
-Mem::Mem(Mapper0 *_mapper, Dma *_dma, Io *_io, APU *_apu)
+Mem::Mem(Mapper0 *_mapper, Dma *_dma, Io *_io, Simple_Apu *_apu)
 {
     mapper = _mapper;
     dma    = _dma;
@@ -15,7 +15,6 @@ void Mem::init()
 {
     printf("mem init\n");
     reset();
-    mapper->init();
 }
 uint8_t Mem::get(uint16_t addr)
 {
@@ -130,8 +129,8 @@ void Mem::set(uint16_t addr, uint8_t data)
                 case 0x400f:
                 case 0x4011:
                 case 0x4012:
-                case 0x4013:{
-                    apu->write(addr, data);
+                case 0x4013: {
+                    apu->write_register(addr, data);
                     break;
                 }
 
@@ -139,8 +138,8 @@ void Mem::set(uint16_t addr, uint8_t data)
                     dma->run(data, mapper->ppu, ram);
                     break;
                 }
-                case 0x4015:{
-                    apu->write(addr, data);
+                case 0x4015: {
+                    apu->write_register(addr, data);
                     break;
                 }
                 case 0x4016: {
@@ -151,14 +150,10 @@ void Mem::set(uint16_t addr, uint8_t data)
                     }
                     break;
                 }
-                case 0x4017:{
-                    apu->write(addr, data);
+                case 0x4017: {
+                    apu->write_register(addr, data);
                     break;
                 }
-
-
-
-
             }
             break;
         }

@@ -1,21 +1,22 @@
 #ifndef _H_HEAD1_
 #define _H_HEAD1_
 
+#include "apu/Nes_Snd_Emu-0.1.7/Simple_Apu.h"
+#include "apu/Nes_Snd_Emu-0.1.7/Sound_Queue.h"
 #include "dma.h"
-#include "mapper0.h"
 #include "io.h"
-#include "apu/apu.h"
+#include "mapper0.h"
 
 class Mem {
   public:
-    uint8_t  ram[0x800]{};
-    Mapper0 *mapper = nullptr;
-    Dma     *dma    = nullptr;
-    Io      *io     = nullptr;
-    APU     *apu    = nullptr;
+    uint8_t     ram[0x800]{};
+    Mapper0    *mapper = nullptr;
+    Dma        *dma    = nullptr;
+    Io         *io     = nullptr;
+    Simple_Apu *apu    = nullptr;
 
   public:
-    Mem(Mapper0 *_mapper, Dma *dma, Io *_io, APU *_apu);
+    Mem(Mapper0 *_mapper, Dma *dma, Io *_io, Simple_Apu *_apu);
     ~Mem();
     void     init();
     uint8_t  get(uint16_t addr);
@@ -25,4 +26,4 @@ class Mem {
     void reset();
 };
 
-#endif    // _H_HEAD1_
+#endif
