@@ -26,7 +26,7 @@ void Rom::set_rom(string filename)
     fseek(f, 0, SEEK_SET);
     romlen = size;
     rom    = new uint8_t[size];
-    fread(rom, size, 1, f);
+    auto rv = fread(rom, size, 1, f);
     fclose(f);
 
     if (!(rom[0] == 0x4e && rom[1] == 0x45 && rom[2] == 0x53 && rom[3] == 0x1a)) {

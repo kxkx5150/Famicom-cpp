@@ -95,6 +95,8 @@ void Nes::main_loop(size_t count, bool cputest)
         cpu->clear_cpucycle();
 
         if (ppu->get_img_status()) {
+            Uint64 start = SDL_GetPerformanceCounter();
+
             auto imgdata = ppu->get_img_data();
             ppu->clear_img();
 
@@ -106,6 +108,11 @@ void Nes::main_loop(size_t count, bool cputest)
             SDL_RenderClear(renderer);
             SDL_RenderCopy(renderer, MooseTexture, NULL, NULL);
             SDL_RenderPresent(renderer);
+
+            Uint64 end       = SDL_GetPerformanceCounter();
+            float  elapsedMS = (end - start) / (float)SDL_GetPerformanceFrequency() * 1000.0f;
+            if (16.666f > elapsedMS)
+                SDL_Delay(floor(16.666f - elapsedMS));
         }
 
         while (SDL_PollEvent(&event)) {
