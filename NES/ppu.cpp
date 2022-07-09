@@ -1,5 +1,4 @@
 #include "ppu.h"
-#include <corecrt.h>
 #include <cstdio>
 
 Ppu::Ppu(Rom *_rom, Irq *_irq)

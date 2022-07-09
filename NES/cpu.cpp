@@ -119,13 +119,13 @@ void Cpu::show_test_state(uint16_t pc, string op, uint16_t adrm)
     printf("   : %s\n", teststr.c_str());
     printf("pc         : %04X\n", pc);
     printf("opcode     : %s\n", op.c_str());
-    printf("totalcycle : %d\n", totalcycle);
+    printf("totalcycle : %zu\n", totalcycle);
 
     if (teststr != okstr) {
         printf("\n\n----------- error -----------\n");
         printf("pc    : %04X\n", pc);
         printf("op    : %s\n", op.c_str());
-        printf("steps : %d\n", steps);
+        printf("steps : %zu\n", steps);
         exit(1);
     }
 }

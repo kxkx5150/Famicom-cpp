@@ -3,9 +3,6 @@ project(Famicom-cpp)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "../exe")
 
-include_directories(./include)
-link_directories(./lib)
-
 file(GLOB sourcefiles 
     "*.h" "*.cpp" "NES/*.h" "NES/*.cpp" 
     "NES/apu/*.h" "NES/apu/*.cpp"
