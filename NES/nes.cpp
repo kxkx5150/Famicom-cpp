@@ -47,7 +47,7 @@ void Nes::init()
 }
 void Nes::set_rom()
 {
-    std::string filename = "sm.nes";
+    std::string filename = "j.nes";
     mapper->set_rom(filename);
 }
 void Nes::start(bool cputest)
