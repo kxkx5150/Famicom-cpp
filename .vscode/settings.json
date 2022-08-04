@@ -1,3 +1,5 @@
 {
-    "FSharp.suggestGitignore": false
-}
+    "FSharp.suggestGitignore": false,
+    "editor.formatOnSave": true,
+    "clang-format.executable": "/usr/bin/clang-format",
+  }

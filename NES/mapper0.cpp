@@ -14,7 +14,7 @@ void Mapper0::init()
     printf("Mapper0 init\n");
     ppu->init();
 }
-void Mapper0::set_rom(string filename)
+void Mapper0::set_rom(std::string filename)
 {
     printf("Mapper0 set_rom\n");
     rom->set_rom(filename);

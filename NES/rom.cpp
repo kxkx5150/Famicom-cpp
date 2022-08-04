@@ -1,7 +1,5 @@
 #include "rom.h"
 
-#define SIZE_OF_ARRAY(array) (sizeof(array) / sizeof(array[0]))
-
 Rom::Rom()
 {
     for (int i = 0; i < 16; i++) {
@@ -11,21 +9,20 @@ Rom::Rom()
 Rom::~Rom()
 {
     delete[] rom;
-
     for (int i = 0; i < 16; i++) {
         delete[] roms[i];
         delete[] prgrom_pages[i];
         delete[] chrrom_pages[i];
     }
 }
-void Rom::set_rom(string filename)
+void Rom::set_rom(std::string filename)
 {
     FILE *f = fopen(filename.c_str(), "rb");
     fseek(f, 0, SEEK_END);
     const int size = ftell(f);
     fseek(f, 0, SEEK_SET);
-    romlen = size;
-    rom    = new uint8_t[size];
+    romlen  = size;
+    rom     = new uint8_t[size];
     auto rv = fread(rom, size, 1, f);
     fclose(f);
 
@@ -93,9 +90,6 @@ void Rom::create_pages()
         }
     }
 }
-void Rom::clear_roms()
-{
-}
 void Rom::set_prgrom_page_8k(int page, int rompage)
 {
     if (rompage < 0) {
@@ -107,9 +101,9 @@ void Rom::set_prgrom_page_8k(int page, int rompage)
     } else {
         prgrom_state[page] = rompage % (prg_rom_page_count * 2);
 
-        size_t idx    = prgrom_state[page];
-        auto   prgrom = prgrom_pages[idx];
-        auto   plen   = prgrom_page_len[idx];
+        uint64_t idx    = prgrom_state[page];
+        auto     prgrom = prgrom_pages[idx];
+        auto     plen   = prgrom_page_len[idx];
 
         for (int i = 0; i < plen; i++) {
             roms[page][i] = prgrom[i];

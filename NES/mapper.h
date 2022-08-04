@@ -3,7 +3,6 @@
 
 #include <fstream>
 
-using namespace std;
 
 class MapperBase {
   public:

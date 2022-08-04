@@ -6,7 +6,6 @@
 #include "rom.h"
 
 
-using namespace std;
 
 class Mapper0 : public MapperBase {
   public:
@@ -18,7 +17,7 @@ class Mapper0 : public MapperBase {
     ~Mapper0();
 
     void init();
-    void set_rom(string filename);
+    void set_rom(std::string filename);
 };
 
 #endif    // _H_MAPPER0

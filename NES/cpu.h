@@ -5,16 +5,15 @@
 #include "mem.h"
 
 
-using namespace std;
 
 struct Opcode
 {
-    size_t opcode;
-    size_t opint;
-    string hex;
-    string op;
-    size_t adm;
-    size_t cycle;
+    uint64_t opcode;
+    uint64_t opint;
+    std::string hex;
+    std::string op;
+    uint64_t adm;
+    uint64_t cycle;
 };
 
 class Cpu {
@@ -33,12 +32,12 @@ class Cpu {
     bool carry;
 
     uint8_t toirq;
-    size_t  cpuclock;
-    size_t  cycles;
-    size_t  total;
+    uint64_t  cpuclock;
+    uint64_t  cycles;
+    uint64_t  total;
 
-    size_t steps;
-    size_t totalcycle;
+    uint64_t steps;
+    uint64_t totalcycle;
     Mem   *mem;
     Irq   *irq;
 
@@ -59,19 +58,19 @@ class Cpu {
     void clear_cpucycle();
 
   private:
-    void create_opcode(size_t opcode, size_t opint, string hex, string op, size_t adm, size_t cycle);
+    void create_opcode(uint64_t opcode, uint64_t opint, std::string hex, std::string op, uint64_t adm, uint64_t cycle);
     void create_opcodes();
 
     uint16_t get_addr(int mode);
-    void     exe_instruction(size_t opint, uint16_t addr);
+    void     exe_instruction(uint64_t opint, uint16_t addr);
 
     void    set_zero_and_ng(uint8_t rval);
     void    setp(uint8_t value);
     uint8_t getp(bool bFlag);
     void    doBranch(bool test, uint16_t reladr);
 
-    void show_state(uint16_t pc, string op, uint16_t adrm);
-    void show_test_state(uint16_t pc, string op, uint16_t adrm);
+    void show_state(uint16_t pc, std::string op, uint16_t adrm);
+    void show_test_state(uint16_t pc, std::string op, uint16_t adrm);
 };
 
 #endif    // _H_CPU

@@ -187,7 +187,7 @@ uint16_t Mem::get16(uint16_t addr)
 }
 void Mem::reset()
 {
-    for (size_t i = 0; i < 0x800; i++) {
+    for (uint64_t i = 0; i < 0x800; i++) {
         ram[i] = 0;
     }
 }

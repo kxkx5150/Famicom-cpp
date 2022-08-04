@@ -34,7 +34,7 @@ class Nes {
     void    init();
     void    set_rom();
     void    start(bool cputest = false);
-    void    main_loop(size_t count, bool cputest);
+    void    main_loop(uint64_t count, bool cputest);
     uint8_t keycode_to_pad(SDL_Event event);
     void    UpdateTexture(SDL_Texture *texture, uint32_t *imgdata);
 };

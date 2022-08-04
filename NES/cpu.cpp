@@ -1,6 +1,5 @@
 #include "cpu.h"
 #include "cpu_enum.h"
-#include "nestest.h"
 
 Cpu::Cpu(Mem *_mem, Irq *_irq)
 {
@@ -86,7 +85,7 @@ void Cpu::run(bool cputest)
     }
 
     exe_instruction(optobj.opcode, adrm);
-    size_t cpucycle = cpuclock;
+    uint64_t cpucycle = cpuclock;
     totalcycle += cpucycle;
     steps++;
 }
@@ -94,7 +93,7 @@ void Cpu::clear_cpucycle()
 {
     cpuclock = 0;
 }
-void Cpu::show_state(uint16_t pc, string op, uint16_t adrm)
+void Cpu::show_state(uint16_t pc, std::string op, uint16_t adrm)
 {
     auto p = getp(false);
     printf("\n");
@@ -102,32 +101,32 @@ void Cpu::show_state(uint16_t pc, string op, uint16_t adrm)
     printf("opcode     : %s\n", op.c_str());
     printf("regs       : A:%02X X:%02X Y:%02X P:%02X SP:%02X\n", a, x, y, p, sp);
 }
-void Cpu::show_test_state(uint16_t pc, string op, uint16_t adrm)
+void Cpu::show_test_state(uint16_t pc, std::string op, uint16_t adrm)
 {
-    auto p = getp(false);
-    char testchar[200];
-    // sprintf (teststr, "%04X", pc);
-    // sprintf (teststr, "CYC:%d", totalcycle);
-    sprintf(testchar, "A:%02X X:%02X Y:%02X P:%02X SP:%02X", a, x, y, p, sp);
-    string teststr = testchar;
-    // string okstr = NESTEST_ADDR.at(steps);
-    // string okstr = NESTEST_CYCLES.at(steps);
-    string okstr = NESTEST_REGS.at(steps);
+    // auto p = getp(false);
+    // char testchar[200];
+    // // sprintf (teststr, "%04X", pc);
+    // // sprintf (teststr, "CYC:%d", totalcycle);
+    // sprintf(testchar, "A:%02X X:%02X Y:%02X P:%02X SP:%02X", a, x, y, p, sp);
+    // std::string teststr = testchar;
+    // // string okstr = NESTEST_ADDR.at(steps);
+    // // string okstr = NESTEST_CYCLES.at(steps);
+    // std::string okstr = NESTEST_REGS.at(steps);
 
-    printf("\n");
-    printf("OK : %s\n", okstr.c_str());
-    printf("   : %s\n", teststr.c_str());
-    printf("pc         : %04X\n", pc);
-    printf("opcode     : %s\n", op.c_str());
-    printf("totalcycle : %zu\n", totalcycle);
+    // printf("\n");
+    // printf("OK : %s\n", okstr.c_str());
+    // printf("   : %s\n", teststr.c_str());
+    // printf("pc         : %04X\n", pc);
+    // printf("opcode     : %s\n", op.c_str());
+    // printf("totalcycle : %zu\n", totalcycle);
 
-    if (teststr != okstr) {
-        printf("\n\n----------- error -----------\n");
-        printf("pc    : %04X\n", pc);
-        printf("op    : %s\n", op.c_str());
-        printf("steps : %zu\n", steps);
-        exit(1);
-    }
+    // if (teststr != okstr) {
+    //     printf("\n\n----------- error -----------\n");
+    //     printf("pc    : %04X\n", pc);
+    //     printf("op    : %s\n", op.c_str());
+    //     printf("steps : %zu\n", steps);
+    //     exit(1);
+    // }
 }
 uint16_t Cpu::get_addr(int adm)
 {
@@ -225,7 +224,7 @@ uint16_t Cpu::get_addr(int adm)
     }
     return 0;
 }
-void Cpu::exe_instruction(size_t opint, uint16_t addr)
+void Cpu::exe_instruction(uint64_t opint, uint16_t addr)
 {
     switch (opint) {
         case UNI: {
@@ -760,7 +759,7 @@ void Cpu::doBranch(bool test, uint16_t reladr)
         pc = adr;
     }
 }
-void Cpu::create_opcode(size_t opcode, size_t opint, string hex, string op, size_t adm, size_t cycle)
+void Cpu::create_opcode(uint64_t opcode, uint64_t opint, std::string hex, std::string op, uint64_t adm, uint64_t cycle)
 {
     opcodes[opint] = Opcode{.opcode = opcode, .opint = opint, .hex = hex, .op = op, .adm = adm, .cycle = cycle};
 }

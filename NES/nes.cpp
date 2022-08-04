@@ -47,21 +47,21 @@ void Nes::init()
 }
 void Nes::set_rom()
 {
-    string filename = "j.nes";
+    std::string filename = "sm.nes";
     mapper->set_rom(filename);
 }
 void Nes::start(bool cputest)
 {
     init();
     // cputest = true;
-    size_t count = 0;
+    uint64_t count = 0;
     if (cputest) {
         cpu->init_nestest();
         count = 8992;
     }
     main_loop(count, cputest);
 }
-void Nes::main_loop(size_t count, bool cputest)
+void Nes::main_loop(uint64_t count, bool cputest)
 {
     SDL_Renderer *renderer;
     SDL_Texture  *MooseTexture;
@@ -77,7 +77,7 @@ void Nes::main_loop(size_t count, bool cputest)
         exit(EXIT_FAILURE);
     atexit(SDL_Quit);
 
-    size_t        i    = 0;
+    uint64_t      i    = 0;
     bool          quit = false;
     uint8_t       pad  = 0;
     blip_sample_t buf[2048];
@@ -87,33 +87,36 @@ void Nes::main_loop(size_t count, bool cputest)
         if (i == count)
             break;
 
-        if (io->get_ctrllatched()) {
-            io->hdCtrlLatch();
+        while (true) {
+            if (io->get_ctrllatched()) {
+                io->hdCtrlLatch();
+            }
+            if (!ppu->get_img_status()) {
+                cpu->run(cputest);
+                ppu->run(cpu->cpuclock);
+                cpu->clear_cpucycle();
+            } else {
+                break;
+            }
         }
-        cpu->run(cputest);
-        ppu->run(cpu->cpuclock);
-        cpu->clear_cpucycle();
 
-        if (ppu->get_img_status()) {
-            Uint64 start = SDL_GetPerformanceCounter();
+        Uint64 start   = SDL_GetPerformanceCounter();
+        auto   imgdata = ppu->get_img_data();
+        ppu->clear_img();
 
-            auto imgdata = ppu->get_img_data();
-            ppu->clear_img();
+        apu->end_frame();
+        long count = apu->read_samples(buf, sizeof(buf) / sizeof(blip_sample_t));
+        sound_queue->write(buf, count);
 
-            apu->end_frame();
-            long count = apu->read_samples(buf, sizeof(buf) / sizeof(blip_sample_t));
-            sound_queue->write(buf, count);
+        UpdateTexture(MooseTexture, imgdata);
+        SDL_RenderClear(renderer);
+        SDL_RenderCopy(renderer, MooseTexture, NULL, NULL);
+        SDL_RenderPresent(renderer);
 
-            UpdateTexture(MooseTexture, imgdata);
-            SDL_RenderClear(renderer);
-            SDL_RenderCopy(renderer, MooseTexture, NULL, NULL);
-            SDL_RenderPresent(renderer);
-
-            Uint64 end       = SDL_GetPerformanceCounter();
-            float  elapsedMS = (end - start) / (float)SDL_GetPerformanceFrequency() * 1000.0f;
-            if (16.666f > elapsedMS)
-                SDL_Delay(floor(16.666f - elapsedMS));
-        }
+        Uint64 end       = SDL_GetPerformanceCounter();
+        float  elapsedMS = (end - start) / (float)SDL_GetPerformanceFrequency() * 1000.0f;
+        if (16.666f > elapsedMS)
+            SDL_Delay(floor(16.666f - elapsedMS));
 
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
@@ -159,7 +162,7 @@ uint8_t Nes::keycode_to_pad(SDL_Event event)
 }
 void Nes::UpdateTexture(SDL_Texture *texture, uint32_t *imgdata)
 {
-    size_t     imgidx = 0;
+    uint64_t   imgidx = 0;
     SDL_Color *color;
     Uint8     *src;
     Uint32    *dst;

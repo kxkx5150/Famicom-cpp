@@ -6,8 +6,8 @@
 Blip_Buffer buf;
 Nes_Apu apu;
 
-void output_samples( const blip_sample_t*, size_t count );
-const size_t out_size = 4096;
+void output_samples( const blip_sample_t*, uint64_t count );
+const uint64_t out_size = 4096;
 blip_sample_t out_buf [out_size];
 
 int total_cycles;
@@ -61,7 +61,7 @@ void end_time_frame( int length )
 	// Read some samples out of Blip_Buffer if there are enough to fill our output buffer
 	if ( buf.samples_avail() >= out_size )
 	{
-		size_t count = buf.read_samples( out_buf, out_size );
+		uint64_t count = buf.read_samples( out_buf, out_size );
 		output_samples( out_buf, count );
 	}
 }
@@ -91,8 +91,8 @@ void init()
 Blip_Buffer buf;
 Nes_Apu apu;
 
-void output_samples( const blip_sample_t*, size_t count );
-const size_t out_size = 4096;
+void output_samples( const blip_sample_t*, uint64_t count );
+const uint64_t out_size = 4096;
 blip_sample_t out_buf [out_size];
 
 cpu_time_t cpu_end_time; // Time for CPU to stop at
@@ -192,7 +192,7 @@ void end_time_frame( cpu_time_t length )
 	// Read some samples out of Blip_Buffer if there are enough to fill our output buffer
 	if ( buf.samples_avail() >= out_size )
 	{
-		size_t count = buf.read_samples( out_buf, out_size );
+		uint64_t count = buf.read_samples( out_buf, out_size );
 		output_samples( out_buf, count );
 	}
 }

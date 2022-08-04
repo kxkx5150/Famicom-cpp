@@ -51,9 +51,9 @@ void Ppu::crate_spbit_array()
     for (int i = 0; i < 256; i++) {
         for (int j = 0; j < 256; j++) {
             for (int k = 0; k < 8; k++) {
-                size_t lval            = (((i << k) & 0x80) >> 7);
-                size_t rval            = (((j << k) & 0x80) >> 6);
-                size_t val             = (lval | rval);
+                uint64_t lval          = (((i << k) & 0x80) >> 7);
+                uint64_t rval          = (((j << k) & 0x80) >> 6);
+                uint64_t val           = (lval | rval);
                 spbit_pattern[i][j][k] = val;
             }
         }
@@ -70,35 +70,35 @@ void Ppu::set_mode_mirror(bool value)
         init_mirrors(0, 1, 0, 1);
     }
 }
-void Ppu::init_mirrors(size_t value0, size_t value1, size_t value2, size_t value3)
+void Ppu::init_mirrors(uint64_t value0, uint64_t value1, uint64_t value2, uint64_t value3)
 {
     set_chr_rom_data1k(8, value0 + 8 + 0x0100);
     set_chr_rom_data1k(9, value1 + 8 + 0x0100);
     set_chr_rom_data1k(10, value2 + 8 + 0x0100);
     set_chr_rom_data1k(11, value3 + 8 + 0x0100);
 }
-void Ppu::set_chr_rom_data1k(size_t page, size_t romPage)
+void Ppu::set_chr_rom_data1k(uint64_t page, uint64_t romPage)
 {
     if (0x0100 <= romPage) {
         rom->chrrom_state[page] = romPage;
         auto prom               = vrams[romPage & 0xff];
-        for (size_t i = 0; i < 1024; i++) {
+        for (uint64_t i = 0; i < 1024; i++) {
             vram[page][i] = prom[i];
         }
     } else if (0 < rom->chr_rom_page_count) {
-        size_t tmp              = romPage % (rom->chr_rom_page_count * 8);
+        uint64_t tmp            = romPage % (rom->chr_rom_page_count * 8);
         rom->chrrom_state[page] = tmp;
 
         auto prom = rom->chrrom_pages[rom->chrrom_state[page]];
         auto len  = rom->chrrom_page_len[rom->chrrom_state[page]];
 
-        for (size_t i = 0; i < len; i++) {
+        for (uint64_t i = 0; i < len; i++) {
             vram[page][i] = prom[i];
         }
     }
 }
-void Ppu::set_chrrom_pages1k(size_t rompage0, size_t rompage1, size_t rompage2, size_t rompage3, size_t rompage4,
-                             size_t rompage5, size_t rompage6, size_t rompage7)
+void Ppu::set_chrrom_pages1k(uint64_t rompage0, uint64_t rompage1, uint64_t rompage2, uint64_t rompage3,
+                             uint64_t rompage4, uint64_t rompage5, uint64_t rompage6, uint64_t rompage7)
 {
     set_chr_rom_data1k(0, rompage0);
     set_chr_rom_data1k(1, rompage1);
@@ -109,16 +109,16 @@ void Ppu::set_chrrom_pages1k(size_t rompage0, size_t rompage1, size_t rompage2, 
     set_chr_rom_data1k(6, rompage6);
     set_chr_rom_data1k(7, rompage7);
 }
-void Ppu::set_chr_rom_page(size_t num)
+void Ppu::set_chr_rom_page(uint64_t num)
 {
     num <<= 3;
-    for (size_t i = 0; i < 8; i++) {
+    for (uint64_t i = 0; i < 8; i++) {
         set_chr_rom_data1k(i, num + i);
     }
 }
-void Ppu::run(size_t cpuclock)
+void Ppu::run(uint64_t cpuclock)
 {
-    size_t tmpx = ppux;
+    uint64_t tmpx = ppux;
     ppux += cpuclock * 3;
 
     while (341 <= ppux) {
@@ -137,7 +137,7 @@ void Ppu::run(size_t cpuclock)
         }
     }
     if (sprite_zero && (regs[0x02] & 0x40) != 0x40) {
-        size_t i = ppux > 255 ? 255 : ppux;
+        uint64_t i = ppux > 255 ? 255 : ppux;
         while (tmpx <= i) {
             if (sp_line_buffer[tmpx] == 0) {
                 regs[0x02] |= 0x40;
@@ -155,13 +155,13 @@ void Ppu::render_frame()
         if (8 <= line && line < 232) {
             build_bg();
             build_sp_line();
-            for (size_t p = 0; p < 256; p++) {
-                auto idx = palette[bg_line_buffer[p]];
-                auto pal = PALLETE_TABLE[idx];
-                set_img_data(pal);
+            for (uint64_t p = 0; p < 256; p++) {
+                int  idx = palette[bg_line_buffer[p]];
+                rgb *pal = &PALLETE_TABLE[idx];
+                set_img_data(pal->r, pal->g, pal->b);
             }
         } else {
-            for (size_t p = 0; p < 264; p++) {
+            for (uint64_t p = 0; p < 264; p++) {
                 bg_line_buffer[p] = 0x10;
             }
             build_sp_line();
@@ -181,56 +181,56 @@ void Ppu::render_frame()
             ppu_addr += 0x1000;
         }
     } else if (8 <= line && line < 232) {
-        for (size_t p = 0; p < 256; p++) {
-            auto pal = PALLETE_TABLE[palette[0x10]];
-            set_img_data(pal);
+        for (uint64_t p = 0; p < 256; p++) {
+            rgb *pal = &PALLETE_TABLE[palette[0x10]];
+            set_img_data(pal->r, pal->g, pal->b);
         }
     }
 }
 void Ppu::build_bg()
 {
     if ((regs[0x01] & 0x08) != 0x08) {
-        for (size_t p = 0; p < 264; p++) {
+        for (uint64_t p = 0; p < 264; p++) {
             bg_line_buffer[p] = 0x10;
         }
         return;
     }
     build_bg_line();
     if ((regs[0x01] & 0x02) != 0x02) {
-        for (size_t x = 0; x < 8; x++) {
+        for (uint64_t x = 0; x < 8; x++) {
             bg_line_buffer[x] = 0x10;
         }
     }
 }
 void Ppu::build_bg_line()
 {
-    size_t nameaddr       = 0x2000 | (ppu_addr & 0x0fff);
-    size_t tableaddr      = ((ppu_addr & 0x7000) >> 12) | ((regs[0x00] & 0x10) << 8);
-    size_t name_addr_h    = nameaddr >> 10;
-    size_t name_addr_l    = nameaddr & 0x03ff;
-    size_t pre_name_addrh = name_addr_h;
-    size_t s              = h_scroll_val;
-    size_t q              = 0;
+    uint64_t nameaddr       = 0x2000 | (ppu_addr & 0x0fff);
+    uint64_t tableaddr      = ((ppu_addr & 0x7000) >> 12) | ((regs[0x00] & 0x10) << 8);
+    uint64_t name_addr_h    = nameaddr >> 10;
+    uint64_t name_addr_l    = nameaddr & 0x03ff;
+    uint64_t pre_name_addrh = name_addr_h;
+    uint64_t s              = h_scroll_val;
+    uint64_t q              = 0;
 
-    for (size_t p = 0; p < 33; p++) {
-        auto   vrm     = vram[pre_name_addrh];
-        size_t ptndist = ((vrm[name_addr_l]) << 4) | tableaddr;
-        auto   vvrm    = vram[ptndist >> 10];
+    for (uint64_t p = 0; p < 33; p++) {
+        uint8_t *vrm     = vram[pre_name_addrh];
+        uint64_t ptndist = ((vrm[name_addr_l]) << 4) | tableaddr;
+        uint8_t *vvrm    = vram[ptndist >> 10];
         ptndist &= 0x03ff;
 
-        size_t lval = (name_addr_l & 0x0380) >> 4;
-        size_t rval = ((name_addr_l & 0x001c) >> 2) + 0x03c0;
+        uint64_t lval = (name_addr_l & 0x0380) >> 4;
+        uint64_t rval = ((name_addr_l & 0x001c) >> 2) + 0x03c0;
 
-        size_t lval2 = (name_addr_l & 0x0040) >> 4;
-        size_t rval2 = name_addr_l & 0x0002;
-        size_t attr  = ((vrm[lval | rval] << 2) >> (lval2 | rval2)) & 0x0c;
+        uint64_t lval2 = (name_addr_l & 0x0040) >> 4;
+        uint64_t rval2 = name_addr_l & 0x0002;
+        uint64_t attr  = ((vrm[lval | rval] << 2) >> (lval2 | rval2)) & 0x0c;
 
-        size_t spbidx1 = vvrm[ptndist];
-        size_t spbidx2 = vvrm[(ptndist + 8)];
-        auto   ptn     = spbit_pattern[spbidx1][spbidx2];
+        uint64_t spbidx1 = vvrm[ptndist];
+        uint64_t spbidx2 = vvrm[(ptndist + 8)];
+        uint8_t *ptn     = spbit_pattern[spbidx1][spbidx2];
 
         while (s < 8) {
-            size_t idx        = ptn[s] | attr;
+            uint64_t idx      = ptn[s] | attr;
             bg_line_buffer[q] = PALLETE[idx];
             q += 1;
             s += 1;
@@ -248,20 +248,20 @@ void Ppu::build_bg_line()
 }
 void Ppu::build_sp_line()
 {
-    size_t spclip = (regs[0x01] & 0x04) == 0x04 ? 0 : 8;
+    uint64_t spclip = (regs[0x01] & 0x04) == 0x04 ? 0 : 8;
 
     if ((regs[0x01] & 0x10) == 0x10) {
 
-        for (size_t p = 0; p < 264; p++) {
+        for (uint64_t p = 0; p < 264; p++) {
             sp_line_buffer[p] = 256;
         }
 
-        size_t spptableaddr = ((regs[0x00] & 0x08)) << 9;
-        size_t count        = 0;
-        size_t bzsize       = is_bigsize();
+        uint64_t spptableaddr = ((regs[0x00] & 0x08)) << 9;
+        uint64_t count        = 0;
+        uint64_t bzsize       = is_bigsize();
 
-        for (size_t i = 0; i < 252; i += 4) {
-            size_t isy = (sprite_ram[i] + 1);
+        for (uint64_t i = 0; i < 252; i += 4) {
+            uint64_t isy = (sprite_ram[i] + 1);
             if (isy > line || (isy + bzsize <= line)) {
                 continue;
             }
@@ -275,38 +275,38 @@ void Ppu::build_sp_line()
                 break;
             }
 
-            size_t attr      = sprite_ram[i + 2];
-            size_t attribute = (((attr & 0x03)) << 2) | 0x10;
-            size_t bgsp      = (attr & 0x20) == 0x00;
+            uint64_t attr      = sprite_ram[i + 2];
+            uint64_t attribute = (((attr & 0x03)) << 2) | 0x10;
+            uint64_t bgsp      = (attr & 0x20) == 0x00;
 
-            size_t x  = (sprite_ram[i + 3]);
-            size_t ex = x + 8;
+            uint64_t x  = (sprite_ram[i + 3]);
+            uint64_t ex = x + 8;
             if (ex > 256) {
                 ex = 256;
             }
 
-            size_t iy   = (attr & 0x80) == 0x80 ? (bzsize - 1 - (line - isy)) : (line - isy);
-            size_t lval = ((sprite_ram[i + 1]) << 4) + spptableaddr;
-            size_t rval = ((sprite_ram[i + 1] & 0xfe) << 4) + ((sprite_ram[i + 1] & 0x01) << 12);
-            size_t sval = bzsize == 8 ? lval : rval;
+            uint64_t iy   = (attr & 0x80) == 0x80 ? (bzsize - 1 - (line - isy)) : (line - isy);
+            uint64_t lval = ((sprite_ram[i + 1]) << 4) + spptableaddr;
+            uint64_t rval = ((sprite_ram[i + 1] & 0xfe) << 4) + ((sprite_ram[i + 1] & 0x01) << 12);
+            uint64_t sval = bzsize == 8 ? lval : rval;
 
-            size_t tilenum = ((iy & 0x08) << 1) + (iy & 0x07) + sval;
-            size_t tlow    = tilenum & 0x03ff;
+            uint64_t tilenum = ((iy & 0x08) << 1) + (iy & 0x07) + sval;
+            uint64_t tlow    = tilenum & 0x03ff;
 
-            size_t is = 7;
-            size_t ia = -1;
+            uint64_t is = 7;
+            uint64_t ia = -1;
             if ((attr & 0x40) == 0x00) {
                 is = 0;
                 ia = 1;
             }
 
-            size_t ptnidxl = vram[tilenum >> 10][tlow];
-            size_t ptnidxr = vram[tilenum >> 10][tlow + 8];
-            auto   ptn     = spbit_pattern[ptnidxl][ptnidxr];
+            uint64_t ptnidxl = vram[tilenum >> 10][tlow];
+            uint64_t ptnidxr = vram[tilenum >> 10][tlow + 8];
+            uint8_t *ptn     = spbit_pattern[ptnidxl][ptnidxr];
 
             while (x < ex) {
 
-                size_t tptn = ptn[is];
+                uint64_t tptn = ptn[is];
                 if (tptn != 0x00 && (sp_line_buffer[x] == 256)) {
                     sp_line_buffer[x] = i;
                     if (x >= spclip && (bgsp || bg_line_buffer[x] == 0x10)) {
@@ -343,9 +343,9 @@ void Ppu::post_render()
     regs[0x02] &= 0x7f;
     imgok = true;
 }
-void Ppu::set_img_data(std::vector<uint8_t> rgb)
+void Ppu::set_img_data(uint8_t r, uint8_t g, uint8_t b)
 {
-    uint32_t dots   = (0xFF000000 | (rgb[0] << 16) | (rgb[1] << 8) | rgb[2]);
+    uint32_t dots   = (0xFF000000 | (r << 16) | (g << 8) | b);
     imgdata[imgidx] = dots;
     imgidx++;
 }
