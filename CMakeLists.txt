@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 project(Famicom-cpp)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "../exe")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/exe)
 
 file(GLOB sourcefiles 
     "*.h" "*.cpp" "NES/*.h" "NES/*.cpp" 
